@@ -1,4 +1,4 @@
-# CIS046 - Software Enterprise Module Project ( MathCraft - Frontend )
+# CIS046 - SE Module Project ( MathCraft - Frontend )
 
 # CIS046 - Software Enterprise Module
 
