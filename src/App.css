@@ -1,0 +1,163 @@
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 15px rgba(236, 72, 153, 0.7), 0 0 30px rgba(236, 72, 153, 0.5);
+  transform: scale(1.05);
+  transition: all 0.3s ease-in-out;
+}
+
+.animate-fade-in {
+  opacity: 0;
+  animation: fadeIn 1s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.floating-number {
+  position: absolute;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #f472b6;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.tab-active {
+  background: linear-gradient(to right, #ec4899, #db2777);
+  color: white;
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.5);
+  transform: scale(1.05);
+}
+
+.tab-inactive {
+  background: white;
+  color: #ec4899;
+  border: 2px solid #ec4899;
+  box-shadow: 0 2px 6px rgba(236, 72, 153, 0.2);
+  transform: scale(1);
+}
+
+.tab-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.3s ease-in-out;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+.glow-hover:hover {
+  box-shadow: 0 6px 30px rgba(219,39,119,0.15), 0 2px 8px rgba(236,72,153,0.08);
+  transform: translateY(-3px);
+  transition: all 220ms cubic-bezier(.2,.9,.2,1);
+}
+
+.floating-number {
+  position: absolute;
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: #f472b6;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.card-appear {
+  transform-origin: center;
+}
+
+/* Custom utility for the Hero Text */
+.hero-text-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInSlideUp 1.2s ease-out forwards;
+    /* This delay allows staggered appearance */
+    animation-delay: var(--animation-delay, 0s); 
+}
+
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* * CSS for Scroll Reveal Animation
+* This works with the Intersection Observer in Home.jsx
+*/
+.scroll-reveal-item {
+    /* Base state: invisible and translated down */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.scroll-reveal-item.is-visible {
+    /* Visible state: fully opaque and in original position */
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Custom spin for the Hero section placeholder */
+.animate-spin-slow {
+    animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
