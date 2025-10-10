@@ -129,7 +129,7 @@ const Home = () => {
  const handleLearnMore = () => {
   const challengeSection = document.getElementById('challenge');
   if (challengeSection) {
-    const navbarHeight = 64; // Adjust if your navbar height changes
+    const navbarHeight = 64; 
     const top = challengeSection.getBoundingClientRect().top + window.scrollY - navbarHeight;
     window.scrollTo({
       top,
