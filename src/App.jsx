@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Home from "./components/Home"; 
 import LoginRegister from "./pages/LoginRegister"; 
 import Layout from "./components/Layout"; 
+import Graph from "./pages/Graph";
 import "./App.css";
 
 const isLoggedIn = () => !!localStorage.getItem("token"); 
@@ -31,6 +32,12 @@ function App() {
             </PrivateRoute>
           }
         />
+         {/* Example: Graph page route */}
+        <Route path="/graph" element={
+          <PrivateRoute>
+            <Graph />
+          </PrivateRoute>
+        } />
 
         {/* Fallback redirect (any unknown path → Home) */}
         <Route path="*" element={<Navigate to="/" />} />
