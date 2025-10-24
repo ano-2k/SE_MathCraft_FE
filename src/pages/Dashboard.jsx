@@ -609,42 +609,52 @@ useEffect(() => {
       );
     };
 
-    // --- LEVEL PROGRESS CARD COMPONENT (Unchanged) ---
+     // --- LEVEL PROGRESS CARD COMPONENT (Unchanged) ---
     const LevelProgressCard = ({ level, correctStreak, maxStreak }) => {
         const progressPercentage = (correctStreak / maxStreak) * 100;
         
         return (
             <GameCard className="!p-4 bg-pink-50 border-pink-300 shadow-lg h-full">
-                <div className="flex items-center justify-between h-full">
-                    {/* Level Card (Rectangular with animation) */}
-                    <div 
-                        className="flex items-center space-x-3 p-3 bg-white rounded-xl border-2 border-purple-400 shadow-xl transition-all duration-500 hover:scale-[1.05] glow-hover"
-                    >
-                        <span className="text-sm font-black text-gray-700 uppercase">Current LVL</span>
-                        <span className="text-3xl font-black text-purple-700 transition-transform duration-500">
-                            {level}
-                        </span>
-                    </div>
+  <div className="flex items-center justify-between h-full">
+    {/* Level Card (Rectangular with animation) */}
+    <div
+      className="flex items-center space-x-3 p-3 bg-white rounded-xl border-2 border-purple-400 shadow-xl transition-all duration-500 hover:scale-[1.05] glow-hover"
+    >
+      <span className="text-sm font-black text-gray-700 uppercase">Current LVL</span>
+      <span className="text-3xl font-black text-purple-700 transition-transform duration-500">
+        {level}
+      </span>
+    </div>
 
-                    {/* Progress Bar and Text */}
-                    <div className="flex-1 ml-6">
-                        <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm font-semibold text-pink-600">
-                                Progress to Level {level + 1}
-                            </span>
-                            <span className="text-xs font-bold text-gray-600">
-                                {correctStreak}/{maxStreak} Correct Streak
-                            </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
-                            <div
-                                className="h-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-500 shadow-lg"
-                                style={{ width: `${progressPercentage}%` }}
-                            ></div>
-                        </div>
-                    </div>
-                </div>
-            </GameCard>
+    {/* Progress Bar and Text */}
+    <div className="flex-1 ml-6">
+      <div className="flex justify-between items-center mb-1">
+        <span className="text-sm font-semibold text-pink-600">
+          Progress to Level {level + 1}
+        </span>
+        <span className="text-xs font-bold text-gray-600">
+          {correctStreak}/{maxStreak} Correct Streak
+        </span>
+      </div>
+
+      <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner mb-1">
+        <div
+          className="h-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 transition-all duration-500 shadow-lg"
+          style={{ width: `${progressPercentage}%` }}
+        ></div>
+      </div>
+
+      {/* Level Up Instruction */}
+      <p className="text-[11px] text-gray-600 italic mt-1 leading-snug">
+        ⭐ <span className="font-semibold text-pink-600">Level up rule: </span>  
+        Answer <span className="font-semibold">5 or more questions correctly</span> in any mode  
+        ( Easy, Intermediate, or Hard ) to earn a <span className="text-purple-600 font-semibold">success streak</span>.  
+        Complete <span className="font-bold text-pink-700">5 streaks</span> to reach the next level!
+      </p>
+    </div>
+  </div>
+</GameCard>
+
         );
     };
 
