@@ -3,6 +3,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/Home"; 
 import LoginRegister from "./pages/LoginRegister"; 
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import Layout from "./components/Layout"; 
 import Graph from "./pages/Graph";
 import "./App.css";
@@ -38,9 +39,12 @@ function App() {
             <Graph />
           </PrivateRoute>
         } />
+        <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
 
         {/* Fallback redirect (any unknown path → Home) */}
+
         <Route path="*" element={<Navigate to="/" />} />
+        
       </Routes>
     </Router>
   );

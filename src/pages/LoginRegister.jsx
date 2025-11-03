@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../App.css"; // Your CSS file
+import "../App.css";
 import { Eye, EyeOff } from "lucide-react";
 import Footer from "../components/Footer.jsx";
 import { useNavigate } from "react-router-dom";
@@ -37,9 +37,16 @@ const LoginRegister = () => {
 
   const apiBase = import.meta.env.VITE_BASE_API;
 
+  // Forgot password state
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [forgotUsername, setForgotUsername] = useState(""); // store attempted username
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotStepMessage, setForgotStepMessage] = useState(""); // success/error hint
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     // Floating numbers animation
-    // Check for window.anime to prevent runtime errors if anime.js isn't loaded
     if (typeof window.anime !== "undefined") {
       document.querySelectorAll(".floating-number").forEach((el, index) => {
         window.anime({
@@ -83,9 +90,8 @@ const LoginRegister = () => {
     if (params.get("tab") === "signup") setActiveTab("signup");
   }, []);
 
-const navigate = useNavigate();
-
   // ------------------- API INTEGRATION -------------------
+
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -98,29 +104,16 @@ const navigate = useNavigate();
       const data = await res.json();
 
       if (res.ok) {
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("mc_user", JSON.stringify(data.user));
-
-  // Reset last visited page to dashboard
-  localStorage.setItem("mc_current_page", "dashboard");
-
-  setMessageType("success");
-  setMessage("Login successful! Redirecting...");
-  setTimeout(() => {
-  navigate("/dashboard");
-}, 500); 
-}
- else {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("mc_user", JSON.stringify(data.user));
+        localStorage.setItem("mc_current_page", "dashboard");
+        setMessageType("success");
+        setMessage("Login successful! Redirecting...");
+        setTimeout(() => navigate("/dashboard"), 500);
+      } else {
         setMessageType("error");
-        if (data.non_field_errors && data.non_field_errors.length > 0) {
-          setMessage("Incorrect username or password.");
-        } else if (data.username) {
-          setMessage(`Username: ${data.username.join(", ")}`);
-        } else if (data.password) {
-          setMessage(`Password: ${data.password.join(", ")}`);
-        } else {
-          setMessage("Login failed. Please try again.");
-        }
+        setMessage("Login failed. Please try again later.");
+        setForgotUsername(loginData.username); // store attempted username for forgot password
       }
     } catch (err) {
       console.error(err);
@@ -132,7 +125,6 @@ const navigate = useNavigate();
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
-
     try {
       const res = await fetch(`${apiBase}/api/register/`, {
         method: "POST",
@@ -144,7 +136,6 @@ const navigate = useNavigate();
           confirm_password: signupData.confirmPassword,
         }),
       });
-
       const data = await res.json();
 
       if (res.ok) {
@@ -171,13 +162,29 @@ const navigate = useNavigate();
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotStepMessage("");
+    try {
+      const res = await fetch(`${apiBase}/api/password-reset/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: forgotUsername, email: forgotEmail }),
+      });
+      const data = await res.json();
+      setForgotStepMessage(data.detail);
+    } catch (err) {
+      console.error(err);
+      setForgotStepMessage("Something went wrong. Try again.");
+    }
+  };
+
   const handlePlayNow = () => navigate("/login-register?tab=login");
   const handleRegister = () => navigate("/login-register?tab=signup");
 
   return (
     <div className="flex flex-col min-h-screen relative overflow-hidden bg-gradient-to-br from-white via-pink-100 to-pink-200 font-sans">
-
-      {/* Navbar (Fixed at Top) */}
+      {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-70 backdrop-blur-md shadow-md">
         <div className="w-full">
           <div className="flex justify-between items-center h-16 px-4 sm:px-8">
@@ -203,11 +210,9 @@ const navigate = useNavigate();
         )}
       </nav>
 
-      {/* Main Content Area: Centering and Floating Numbers */}
-      {/* flex-grow ensures this area fills the space between the fixed Navbar and the Footer */}
+      {/* Main Content */}
       <main className="flex-grow flex items-center justify-center relative z-10 pt-20">
-        
-        {/* Floating Numbers (restricted to the main content area) */}
+        {/* Floating Numbers */}
         <div className="absolute inset-0 pointer-events-none w-full h-full">
           {floatingNumbers.map((n, i) => (
             <div
@@ -230,35 +235,82 @@ const navigate = useNavigate();
           ))}
         </div>
 
-        {/* Login/Register Card - Perfectly centered */}
+        {/* Login/Register Card */}
         <div className="bg-white/80 backdrop-blur-md rounded-xl shadow-xl w-full max-w-md p-6 relative z-20 mt-32">
           <h2 className="text-2xl font-bold text-center text-pink-700 mb-6 animate-fade-in">Welcome to MathCraft</h2>
 
           {/* Tabs */}
-          <div className="flex mb-6 gap-2 justify-center">
-            <button
-              className={`tab-button ${activeTab === "login" ? "tab-active" : "tab-inactive"}`}
-              onClick={() => { setActiveTab("login"); setMessage(""); }}
-            >
-              Login
-            </button>
-            <button
-              className={`tab-button ${activeTab === "signup" ? "tab-active" : "tab-inactive"}`}
-              onClick={() => { setActiveTab("signup"); setMessage(""); }}
-            >
-              Signup
-            </button>
-          </div>
+          {!showResetPassword && (
+            <div className="flex mb-6 gap-2 justify-center">
+              <button
+                className={`tab-button ${activeTab === "login" ? "tab-active" : "tab-inactive"}`}
+                onClick={() => { setActiveTab("login"); setMessage(""); }}
+              >
+                Login
+              </button>
+              <button
+                className={`tab-button ${activeTab === "signup" ? "tab-active" : "tab-inactive"}`}
+                onClick={() => { setActiveTab("signup"); setMessage(""); }}
+              >
+                Signup
+              </button>
+            </div>
+          )}
 
           {/* Inline Message */}
-          {message && (
+          {message && !showResetPassword && (
             <div className={`mb-4 p-3 rounded ${messageType === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
               {message}
             </div>
           )}
 
+          {/* Forgot Password Form */}
+          {showResetPassword && (
+            <form onSubmit={handleForgotPassword}>
+              <input
+                type="text"
+                placeholder="Username"
+                className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-pink-400 focus:outline-none bg-gray-100"
+                value={forgotUsername}
+                disabled
+              />
+              <input
+                type="email"
+                placeholder="Enter registered email"
+                className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                required
+              />
+              {forgotStepMessage && (
+  <div
+    className={`mb-4 p-2 rounded text-sm ${
+      forgotStepMessage.toLowerCase().includes("successfully") 
+        ? "bg-green-100 text-green-700" 
+        : "bg-red-100 text-red-700"
+    }`}
+  >
+    {forgotStepMessage}
+  </div>
+)}
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition transform"
+              >
+                Send Reset Link
+              </button>
+              <p
+                className="text-center mt-4 text-gray-600 cursor-pointer hover:underline"
+                onClick={() => { setShowResetPassword(false); setMessage(""); setForgotStepMessage(""); }}
+              >
+                Back to login
+              </p>
+            </form>
+          )}
+
           {/* Login Form */}
-          {activeTab === "login" && (
+          {!showResetPassword && activeTab === "login" && (
             <form onSubmit={handleLoginSubmit}>
               <input
                 type="text"
@@ -283,7 +335,12 @@ const navigate = useNavigate();
                   {showLoginPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
-              <p className="text-sm text-pink-600 mb-4 text-right cursor-pointer hover:underline">Forgot password?</p>
+              <p
+                className="text-sm text-pink-600 mb-4 text-right cursor-pointer hover:underline"
+                onClick={() => setShowResetPassword(true)}
+              >
+                Forgot password?
+              </p>
               <button type="submit" className="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition transform">Login</button>
               <p className="text-center mt-4 text-gray-600">
                 Not a member? <span className="text-pink-500 cursor-pointer hover:underline" onClick={() => setActiveTab("signup")}>Signup now</span>
@@ -292,7 +349,7 @@ const navigate = useNavigate();
           )}
 
           {/* Signup Form */}
-          {activeTab === "signup" && (
+          {!showResetPassword && activeTab === "signup" && (
             <form onSubmit={handleSignupSubmit}>
               <input
                 type="text"
@@ -308,8 +365,6 @@ const navigate = useNavigate();
                 value={signupData.email}
                 onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
               />
-
-              {/* Password */}
               <div className="relative">
                 <input
                   type={showSignupPassword ? "text" : "password"}
@@ -326,8 +381,6 @@ const navigate = useNavigate();
                   {showSignupPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
-
-              {/* Confirm Password */}
               <div className="relative">
                 <input
                   type={showSignupConfirmPassword ? "text" : "password"}
@@ -344,17 +397,15 @@ const navigate = useNavigate();
                   {showSignupConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
-
               <button type="submit" className="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition transform">Signup</button>
               <p className="text-center mt-4 text-gray-600">
-                Already a member? <span className="text-pink-500 cursor-pointer hover:underline" onClick={() => setActiveTab("login")}>Login now</span>
+                Already a member? <span className="text-pink-500 cursor-pointer hover:underline" onClick={() => setActiveTab("login")}>Login</span>
               </p>
             </form>
           )}
         </div>
       </main>
 
-      {/* Footer - Full width at the absolute bottom */}
       <Footer />
     </div>
   );

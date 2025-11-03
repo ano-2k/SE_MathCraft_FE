@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 // Lucide Icon
 import { Award } from "lucide-react"; 
-
+import { User, Edit2, LogOut } from "lucide-react";
 const BASE_API = import.meta.env.VITE_BASE_API;
 const LOCAL_STORAGE_KEY_USER = "mc_user_v1";
 
@@ -238,17 +238,55 @@ export const useCoins = () => {
 // ----------------------------------------------------------------------
 // 3. Header Component (Displays Coin Count & Animation Overlay) - MODIFIED
 // ----------------------------------------------------------------------
-const Header = ({ pageTitle, setPage }) => {
+const Header = ({ pageTitle, setPage, enterEditMode }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState("");
-  
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const { coins, loading, coinAnimation, achievementNotification } = useCoins();
 
   useEffect(() => {
-    const now = new Date();
-    setCurrentMonth(now.toISOString().slice(0, 7));
-  }, []);
-  
+  const now = new Date();
+  setCurrentMonth(now.toISOString().slice(0, 7));
+
+  const fetchProfilePhoto = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      
+      const res = await axios.get(`${BASE_API}/api/profile/`, {
+        headers: { Authorization: `Token ${token}` },
+      });
+
+      setProfilePhoto(res.data.photo);
+    } catch (err) {
+      console.error("Error fetching profile photo:", err);
+    }
+  };
+
+  fetchProfilePhoto();
+}, []);
+
+const handleLogout = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (token) {
+      await axios.post(
+        `${BASE_API}/api/logout/`,
+        {},
+        { headers: { Authorization: `Token ${token}` } }
+      );
+    }
+  } catch (err) {
+    console.warn("Logout API failed, forcing local logout.", err);
+  } finally {
+    localStorage.removeItem("token");
+    localStorage.removeItem("mc_user");
+    localStorage.removeItem("mc_game_v1_guest");
+    localStorage.removeItem("mc_user_v1");
+    window.location.href = "/login-register";  // redirect to login
+  }
+};
+
   return (
     <header className="fixed top-0 left-64 right-0 z-40 bg-white/70 backdrop-blur-md shadow-md">
       {/* Coin Animation Overlay: Renders above the header and main content */}
@@ -275,38 +313,35 @@ const Header = ({ pageTitle, setPage }) => {
           {/* PROFILE IMAGE + DROPDOWN (Unchanged) */}
           <div className="relative">
             <img
-              onClick={(e) => { e.stopPropagation(); setDropdownOpen(!dropdownOpen); }}
-              src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-              alt="profile"
-              className="w-11 h-11 rounded-full border-2 border-pink-500 cursor-pointer shadow-sm hover:ring-4 hover:ring-pink-300 transition-shadow"
-            />
+  onClick={(e) => { e.stopPropagation(); setDropdownOpen(!dropdownOpen); }}
+  src={profilePhoto || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+  alt="profile"
+  className="w-11 h-11 rounded-full border-2 border-pink-500 cursor-pointer shadow-sm hover:ring-4 hover:ring-pink-300 transition-shadow object-cover"
+/>
             {dropdownOpen && (
               <div className="absolute right-0 mt-3 w-44 bg-white rounded-xl shadow-lg py-2 z-50">
-                <button
-                  onClick={() => { setPage("profileView"); setDropdownOpen(false); }}
-                  className="w-full text-left px-4 py-2 hover:bg-pink-50"
-                >
-                  👤 View Profile
-                </button>
-                <button
-                  onClick={() => { setPage("profileEdit"); setDropdownOpen(false); }}
-                  className="w-full text-left px-4 py-2 hover:bg-pink-50"
-                >
-                  ✏️ Edit Profile
-                </button>
-                <hr className="my-1" />
-                <button
-                  onClick={() => {
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("mc_user");
-                    localStorage.removeItem("mc_game_v1_guest"); 
-                    localStorage.removeItem(LOCAL_STORAGE_KEY_USER); 
-                    window.location.reload();
-                  }}
-                  className="w-full text-left px-4 py-2 hover:bg-pink-50 text-red-500"
-                >
-                  🚪 Logout
-                </button>
+
+<button
+  onClick={() => {
+    setDropdownOpen(false);   // close dropdown
+    setPage("profileEdit");   // navigate to edit page
+    enterEditMode();          // set Layout editMode = true
+  }}
+  className="w-full flex items-center gap-2 px-4 py-2 hover:bg-pink-50"
+>
+  <Edit2 size={16} /> Edit Profile
+</button>
+
+
+<hr className="my-1" />
+
+<button
+  onClick={handleLogout}  
+  className="w-full flex items-center gap-2 px-4 py-2 hover:bg-pink-50 text-red-500"
+>
+  <LogOut size={16} /> Logout
+</button>
+
               </div>
             )}
           </div>

@@ -609,7 +609,7 @@ useEffect(() => {
       );
     };
 
-     // --- LEVEL PROGRESS CARD COMPONENT (Unchanged) ---
+    // --- LEVEL PROGRESS CARD COMPONENT (Unchanged) ---
     const LevelProgressCard = ({ level, correctStreak, maxStreak }) => {
         const progressPercentage = (correctStreak / maxStreak) * 100;
         
