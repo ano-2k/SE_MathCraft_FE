@@ -54,10 +54,11 @@ const AchievementCard = ({
 
   return (
     <div
-      className={`bg-white p-6 rounded-2xl shadow-xl border-b-4 ${
-        isComplete ? "border-purple-600" : "border-pink-300"
-      } flex flex-col items-center text-center transform transition-all duration-500 hover:scale-105 cursor-pointer ${celebrationClasses}`}
-    >
+  className={`bg-white p-4 sm:p-6 rounded-2xl shadow-xl border-b-4 ${
+    isComplete ? "border-purple-600" : "border-pink-300"
+  } flex flex-col items-center text-center transform transition-all duration-500 hover:scale-105 cursor-pointer w-full ${celebrationClasses}`}
+>
+
       <div
         className={`mb-4 transition duration-500 ${
           isComplete
@@ -68,8 +69,10 @@ const AchievementCard = ({
         <IconComponent size={48} strokeWidth={2.5} />
       </div>
 
-      <h4 className="text-xl font-extrabold text-gray-800 mb-2">{title}</h4>
-      <p className="text-sm text-gray-500 mb-4 h-10 flex items-center justify-center italic text-center">
+      <h4 className="text-lg sm:text-xl font-extrabold text-gray-800 mb-2">{title}</h4>
+
+      <p className="text-sm sm:text-base text-gray-500 mb-4 h-auto flex items-center justify-center italic text-center">
+
         {goalDescription}
       </p>
 
@@ -224,8 +227,12 @@ const Achievements = () => {
     );
 
   return (
-    <div className="flex flex-col items-center py-8 px-4 sm:px-12 min-h-screen ml-64">
-      <h1 className="text-4xl font-extrabold text-pink-700 mb-12 mt-4 border-b-4 border-pink-500 pb-4">
+    <div className="flex flex-col items-center py-6 px-4 sm:px-8 min-h-screen lg:ml-64">
+
+
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-pink-700 mb-8 sm:mb-12 mt-12 border-b-4 border-pink-500 pb-3 sm:pb-4 text-center">
+
+
         My Codebreaker Achievements
       </h1>
 
@@ -242,7 +249,9 @@ const Achievements = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl w-full px-2 sm:px-0">
+
+
         {/* Code Crusader */}
         <AchievementCard
           iconName="Shield"
