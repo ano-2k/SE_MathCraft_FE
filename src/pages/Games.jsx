@@ -669,7 +669,6 @@ const handleHint = async () => {
           padding: 0.9rem 2rem;
           border-radius: 0.8rem;
           font-weight: 800;
-          text-transform: uppercase;
           transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           letter-spacing: 0.08em;
           box-shadow: 0 6px #BDBDBD, 0 0 10px rgba(0, 0, 0, 0.1); 
@@ -755,26 +754,26 @@ const handleHint = async () => {
                 {/* Start Screen - MISSION SELECTION */}
                 {!currentQuestion && !showSummary && currentIndex === 0 && !loading && (
                 <section className="game-panel p-10 mb-6 text-center">
-                    <h1 className="text-4xl font-extrabold text-gray-800 mb-6 uppercase tracking-wider">
-                    <span className="text-emerald-600">SELECT</span> PROTOCOL
+                    <h1 className="text-4xl font-extrabold text-gray-800 mb-6 tracking-wider">
+                    <span className="text-emerald-600">Select</span> Mode
                     </h1>
                     <p className="text-gray-600 mb-8 max-w-lg mx-auto text-lg">
                     Choose your challenge threat level. Decode 5 or more sequences to earn your coin reward.
                     </p>
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6">
                     <select
-                        value={mode}
-                        onChange={(e) => setMode(e.target.value)}
-                        className="rounded-xl p-4 bg-gray-50 text-gray-800 border-4 border-pink-500 text-lg shadow-inner w-full md:w-auto hover:bg-gray-100 transition-colors cursor-pointer"
-                    >
-                        <option value="easy">EASY | Threat Lvl 1 (90s, +{DIFFICULTY.easy.coinReward} 💰)</option>
-                        <option value="intermediate">INTERMEDIATE | Threat Lvl 2 (60s, +{DIFFICULTY.intermediate.coinReward} 💰)</option>
-                        <option value="hard">HARD | Threat Lvl 3 (30s, +{DIFFICULTY.hard.coinReward} 💰)</option>
+    value={mode}
+    onChange={(e) => setMode(e.target.value)}
+    className="rounded-xl p-3 bg-gray-50 text-gray-800 border-4 border-pink-500 text-sm sm:text-base shadow-inner w-full max-w-xs mx-auto appearance-none focus:outline-none"
+    style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
+>
+                        <option value="easy">Easy (90s, +1000 coins)</option>
+<option value="intermediate">Intermediate (60s, +2000 coins)</option>
+<option value="hard">Hard (30s, +3000 coins)</option>
                     </select>
-                    <button className="btn btn-submit w-full md:w-auto shadow-pink-600/50 shadow-lg" onClick={startRound}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l.497-.393L10 12.382l8.032 5.242.497.393a1 1 0 001.169-1.409l-7-14z" /></svg>
-                        EXECUTE CHALLENGE
-                    </button>
+                    <button className="btn btn-submit w-full max-w-xs mx-auto md:w-auto shadow-pink-600/50 shadow-lg text-sm sm:text-base whitespace-nowrap px-6 py-3" onClick={startRound}>
+    Execute Challenge
+</button>
                     </div>
                 </section>
                 )}
@@ -784,20 +783,20 @@ const handleHint = async () => {
             <div className="flex flex-col items-center w-full">
                 
                 {/* Stats Bar on Top */}
-                <div className="w-full max-w-3xl mb-6 text-gray-800 p-4 game-panel border-t-4 border-pink-600 shadow-none flex flex-wrap justify-around gap-4 text-center">
-                <div className="text-sm sm:text-lg font-semibold uppercase flex items-center justify-center w-full sm:w-auto">
-                    MODE: <span className={`${modeColor} font-extrabold ml-2 border px-3 py-1 rounded-full ${modePillClass}`}>{mode}</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold uppercase text-gray-600 flex items-center justify-center w-full sm:w-auto">
-                    PUZZLE: <span className="text-gray-900 font-extrabold ml-2">{currentIndex + 1} / {QUESTIONS_PER_ROUND}</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold uppercase text-gray-600 flex items-center justify-center w-full sm:w-auto">
-                    STREAK: <span className={`font-extrabold ${streakTextClass} ml-2 text-2xl`}>{streak}x</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold uppercase text-gray-600 flex items-center justify-center w-full sm:w-auto">
-                    TIME: <span className="font-extrabold text-cyan-600 ml-2">{timer}s</span>
-                </div>
-                </div>
+              <div className="w-full max-w-3xl mb-6 text-gray-800 p-4 game-panel border-t-4 border-pink-600 shadow-none flex flex-col sm:flex-row sm:justify-around gap-2 sm:gap-4 text-center">
+  <div className="text-sm sm:text-lg font-semibold flex items-center justify-between sm:justify-center w-full sm:w-auto px-2">
+      Mode: <span className={`${modeColor} font-extrabold ml-2 border px-3 py-1 rounded-full ${modePillClass}`}>{mode}</span>
+  </div>
+  <div className="text-sm sm:text-lg font-semibold text-gray-600 flex items-center justify-between sm:justify-center w-full sm:w-auto px-2">
+      Puzzle: <span className="text-gray-900 font-extrabold ml-2">{currentIndex + 1} / {QUESTIONS_PER_ROUND}</span>
+  </div>
+  <div className="text-sm sm:text-lg font-semibold text-gray-600 flex items-center justify-between sm:justify-center w-full sm:w-auto px-2">
+      Streak: <span className={`font-extrabold ${streakTextClass} ml-2 text-2xl`}>{streak}x</span>
+  </div>
+  <div className="text-sm sm:text-lg font-semibold text-gray-600 flex items-center justify-between sm:justify-center w-full sm:w-auto px-2">
+      Time: <span className="font-extrabold text-cyan-600 ml-2">{timer}s</span>
+  </div>
+</div>
 
                 {/* Game Section Below */}
                 <section className="game-panel p-6 sm:p-10 flex flex-col gap-8 w-full max-w-3xl">
@@ -807,7 +806,7 @@ const handleHint = async () => {
                 >
                     <div className={`border-4 border-emerald-500 p-3 bg-white rounded-xl shadow-2xl shadow-emerald-500/30 mb-8 w-full max-w-lg mx-auto loading-trim-box h-[300px]`}>
                     {loading ? (
-                        <div className="text-xl text-pink-600 animate-pulse p-10 tracking-widest text-center">...TRANSMITTING DATA SEQUENCE...</div>
+                        <div className="text-xl text-pink-600 animate-pulse p-10 tracking-widest text-center">...Transmitting Data Sequence...</div>
                     ) : (
                         currentQuestion && (
                         <img
@@ -836,7 +835,7 @@ const handleHint = async () => {
                     <div className="flex gap-4 justify-center flex-wrap w-full mt-2">
                     <button className="btn btn-submit shadow-pink-600/40 shadow-xl" onClick={handleSubmit} disabled={loading || !answer}>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                        SUBMIT CODE
+                        Submit
                     </button>
 
                     <button 
@@ -845,12 +844,12 @@ const handleHint = async () => {
                         disabled={loading || hintUsed || user.coins < DIFFICULTY[mode].hintCost}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.81 2.031a1 1 0 00-.36 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.81-2.031a1 1 0 00-1.175 0l-2.81 2.031c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.361-1.118L2.05 8.72a1 1 0 01.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                        PURCHASE HINT ({DIFFICULTY[mode].hintCost} 💰)
+                        Purchase Hint ({DIFFICULTY[mode].hintCost})
                     </button>
 
                     <button className="btn btn-skip shadow-gray-400/50 shadow-xl" onClick={handleNextPuzzle} disabled={loading}>
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline-block mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10.293 15.707a1 1 0 010-1.414L14.586 10l-4.293-4.293a1 1 0 111.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clipRule="evenodd" /><path fillRule="evenodd" d="M4.293 15.707a1 1 0 010-1.414L8.586 10 4.293 5.707a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
-                        NEXT SEQUENCE
+                        Next Puzzle
                     </button>
                     </div>
                     
@@ -865,84 +864,214 @@ const handleHint = async () => {
             )}
 
 
-                {/* Summary Screen - MISSION REPORT (Debrief) */}
-                {showSummary && (
-                <section className="game-panel p-8">
-                    <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center uppercase tracking-wider text-pink-600">
-                    <span className="text-emerald-600">MISSION</span> DEBRIEF
-                    </h2>
-                    
-                    {/* Final Message */}
-                    {roundRecords.length > 0 && roundRecords[roundRecords.length - 1].status === "summary" && (
-                        <div className={`text-lg text-center font-bold mb-8 p-6 rounded-xl border-4 ${roundRecords[roundRecords.length - 1].coins > 0 ? 'bg-green-100/80 border-green-500 shadow-lg shadow-green-600/30 text-green-700' : 'bg-red-100/80 border-red-500 shadow-lg shadow-red-600/30 text-red-700'}`}>
-                            <p className="text-3xl mb-3 text-gray-800">
-                                {roundRecords[roundRecords.length - 1].coins > 0 ? 'STATUS: REWARD GRANTED' : 'STATUS: COMPLETE'}
-                            </p>
-                            {roundRecords[roundRecords.length - 1].message.map((line, i) => (
-                            <p key={i}>{line}</p>
-                            ))}
+                {/* ────────────────────────────────────────────────────────────────
+     SUMMARY SCREEN – RESPONSIVE TABLE / CARD LAYOUT (JSX only)
+   ──────────────────────────────────────────────────────────────── */}
+{showSummary && (
+  <section className="game-panel p-6 sm:p-8">
 
-                        </div>
-                    )}
+    {/* Title */}
+    <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center uppercase tracking-wider text-pink-600">
+      <span className="text-emerald-600">Summary</span>
+    </h2>
 
-                    <h3 className="text-xl font-semibold text-gray-600 mb-4 border-b border-gray-300 pb-2 uppercase tracking-wider">Sequence Log</h3>
-                    
-                    <div className="overflow-x-auto summary-table-container max-h-[400px]">
-                        <table className="min-w-full text-gray-800 table-auto border-collapse text-sm">
-                            <thead>
-                            <tr className="bg-gray-100 uppercase text-xs">
-                                <th className="p-3 font-medium">Question No</th>
-                                <th className="p-3 font-medium">Image</th>
-                                <th className="p-3 font-medium">Time (s)</th>
-                                <th className="p-3 font-medium">Streak</th>
-                                <th className="p-3 font-medium">Your Input</th>
-                                <th className="p-3 font-medium">Correct Answer</th>
-                                <th className="p-3 font-medium">Status</th>
-                            </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-200">
-                            {roundRecords
-                                .filter(r => r.status !== 'summary')
-                                .map((r, i) => (
-                                <tr key={i} className={`text-center transition-colors ${r.status === "correct" ? "bg-green-50/50 hover:bg-green-100" : r.status === "skipped" ? "bg-yellow-50/50 hover:bg-yellow-100" : "bg-red-50/50 hover:bg-red-100"}`}>
-                                <td className="p-1 sm:p-3">{r.question_number}</td>
-                                <td className="p-1 sm:p-3">
-                                <img
-                                    src={r.question_img}
-                                    alt={`Q${r.qNumber}`}
-                                    className="w-16 h-16 object-contain mx-auto rounded-lg border border-gray-300 cursor-pointer hover:scale-105 transition-transform"
-                                    onClick={() => setPreviewImage(r.question_img)}
-                                    onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/80x80/f0f3f7/EC4899?text=NA"; }}
-                                />
-                                </td>
-                                <td className="p-1 sm:p-3 text-cyan-600">{r.time}</td>
-                                 <td className="p-1 sm:p-3 text-pink-600">{r.streak}</td>
-                                <td className="p-1 sm:p-3 font-mono">{r.user_answer}</td>
-                                <td className="p-1 sm:p-3 font-mono">{r.correct_answer}</td>
-                                <td className={`p-1 sm:p-3 font-bold ${r.status === "correct" ? "text-green-600" : r.status === "skipped" ? "text-yellow-600" : "text-red-600"}`}>
-                                    {r.status === "correct" ? "PASS ✔" : r.status === "skipped" ? "SKIP ➡" : "FAIL ✘"}
-                                </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
+     {/* FINAL MISSION RESULT CARD – LIGHT GREEN IF REWARD, LIGHT RED IF NOT */}
+{roundRecords.length > 0 && roundRecords[roundRecords.length - 1].status === "summary" && (
+  <div
+    className={`
+      mx-auto max-w-2xl p-5 sm:p-7 rounded-2xl border-4 shadow-xl
+      text-center font-bold text-lg sm:text-xl
+      ${roundRecords[roundRecords.length - 1].coins > 0
+        ? "bg-gradient-to-br from-green-50 to-green-100 border-green-300 shadow-green-400/30 text-green-700"
+        : "bg-gradient-to-br from-red-50 to-red-100 border-red-300 shadow-red-400/30 text-red-700"
+      }
+    `}
+  >
+    {/* Status Title */}
+    <p className="text-2xl sm:text-3xl mb-3 text-gray-900 font-extrabold tracking-wide">
+      {roundRecords[roundRecords.length - 1].coins > 0 ? "Status: Reward Granted" : "Status: Complete"}
+    </p>
 
+    {/* Mission Summary */}
+    <p className="mb-3 text-base sm:text-lg text-gray-700">
+      Mission Complete: {roundRecords[roundRecords.length - 1].correctCount}/{QUESTIONS_PER_ROUND} Sequences Decoded.
+    </p>
 
-                    <div className="flex justify-center mt-8">
-                    <button className="btn btn-submit text-xl shadow-pink-600/50 shadow-xl" onClick={restartToModeSelection}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-5.464 5.464a1 1 0 000 1.414l7.143 7.143 1.414-1.414-7.143-7.143a1 1 0 00-1.414 0z" /></svg>
-                        SELECT NEW PROTOCOL
-                    </button>
-                    </div>
-                    {roundRecords.length > 0 && roundRecords[roundRecords.length - 1].status === "summary" && (
-                    <div className="mt-6 mx-auto max-w-sm p-6 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-2xl shadow-2xl shadow-pink-500/50 animate-pulse text-center font-extrabold text-2xl">
-                        🎯 IQ SCORE: {roundRecords[roundRecords.length - 1].iq}%
-                    </div>
-                    )}
+    {/* Reward Line – LIGHT GREEN or LIGHT RED */}
+    <p
+      className={`
+        text-lg sm:text-xl font-bold tracking-wider
+        ${roundRecords[roundRecords.length - 1].coins > 0
+          ? "text-green-600"
+          : "text-red-600"
+        }
+      `}
+    >
+      {roundRecords[roundRecords.length - 1].coins > 0
+        ? `+${roundRecords[roundRecords.length - 1].coins} COINS DEPOSITED`
+        : "Reward threshold (5 correct) not met."
+      }
+    </p>
+  </div>
+)}
 
-                </section>
-                )}
+    <h3 className="text-xl font-semibold text-gray-600 mb-4 border-b border-gray-300 pb-2 mt-6 tracking-wider">
+      Sequence Log
+    </h3>
+
+    {/* ────── RESPONSIVE CONTAINER ────── */}
+    <div className="w-full overflow-x-auto sm:overflow-visible">
+
+      {/* ---------- DESKTOP TABLE (≥640px) ---------- */}
+      <table className="hidden sm:table min-w-full table-auto border-collapse text-xs sm:text-sm">
+        <thead>
+          <tr className="bg-gray-100 uppercase text-[10px] sm:text-xs">
+            <th className="p-3 font-medium">Q No</th>
+            <th className="p-3 font-medium">Image</th>
+            <th className="p-3 font-medium">Time (s)</th>
+            <th className="p-3 font-medium">Streak</th>
+            <th className="p-3 font-medium">Your Input</th>
+            <th className="p-3 font-medium">Correct Answer</th>
+            <th className="p-3 font-medium">Status</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {roundRecords
+            .filter(r => r.status !== "summary")
+            .map((r, i) => (
+              <tr
+                key={i}
+                className={`text-center transition-colors ${
+                  r.status === "correct"
+                    ? "bg-green-50/50 hover:bg-green-100"
+                    : r.status === "skipped"
+                    ? "bg-yellow-50/50 hover:bg-yellow-100"
+                    : "bg-red-50/50 hover:bg-red-100"
+                }`}
+              >
+                <td className="p-3">{r.question_number}</td>
+                <td className="p-3">
+                  <img
+                    src={r.question_img}
+                    alt={`Q${r.question_number}`}
+                    className="w-16 h-16 object-contain mx-auto rounded-lg border border-gray-300 cursor-pointer hover:scale-105 transition-transform"
+                    onClick={() => setPreviewImage(r.question_img)}
+                    onError={e => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = "https://placehold.co/80x80/f0f3f7/EC4899?text=NA";
+                    }}
+                  />
+                </td>
+                <td className="p-3 text-cyan-600">{r.time}</td>
+                <td className="p-3 text-pink-600">{r.streak}</td>
+                <td className="p-3 font-mono">{r.user_answer}</td>
+                <td className="p-3 font-mono">{r.correct_answer}</td>
+                <td
+                  className={`p-3 font-bold ${
+                    r.status === "correct"
+                      ? "text-green-600"
+                      : r.status === "skipped"
+                      ? "text-yellow-600"
+                      : "text-red-600"
+                  }`}
+                >
+                  {r.status === "correct" ? "PASS" : r.status === "skipped" ? "SKIP" : "FAIL"}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+
+{/* ---------- MOBILE CARD LIST (<640px) ---------- */}
+<div className="sm:hidden space-y-4">
+  {roundRecords
+    .filter(r => r.status !== "summary")
+    .map((r, i) => (
+      <div
+        key={i}
+        className={`p-4 rounded-lg border-2 ${
+          r.status === "correct"
+            ? "bg-green-50 border-green-400"
+            : r.status === "skipped"
+            ? "bg-yellow-50 border-yellow-400"
+            : "bg-red-50 border-red-400"
+        }`}
+      >
+        {/* Q# + Status */}
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-bold text-gray-800">Q{r.question_number}</span>
+          <span
+            className={`font-bold ${
+              r.status === "correct"
+                ? "text-green-600"
+                : r.status === "skipped"
+                ? "text-yellow-600"
+                : "text-red-600"
+            }`}
+          >
+            {r.status === "correct" ? "PASS" : r.status === "skipped" ? "SKIP" : "FAIL"}
+          </span>
+        </div>
+
+        {/* Image – scrollable if needed */}
+        <div className="overflow-x-auto -mx-4 px-4 mb-3">
+          <img
+            src={r.question_img}
+            alt={`Q${r.question_number}`}
+            className="h-24 w-auto max-w-none mx-auto rounded border border-gray-300 cursor-pointer"
+            onClick={() => setPreviewImage(r.question_img)}
+            onError={e => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = "https://placehold.co/80x80/f0f3f7/EC4899?text=NA";
+            }}
+          />
+        </div>
+
+        {/* Text data – 2-column grid */}
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <span className="font-bold text-gray-600">Time</span>
+            <p className="font-bold text-cyan-600">{r.time}s</p>
+          </div>
+          <div>
+            <span className="font-bold text-gray-600">Streak</span>
+            <p className="font-bold text-pink-600">{r.streak}</p>
+          </div>
+          <div>
+            <span className="font-bold text-gray-600">Your Input</span>
+            <p className="font text-gray-800">
+              {/* Lower-case only for SKIPPED */}
+              {r.status === "skipped" ? r.user_answer.toLowerCase() : r.user_answer}
+            </p>
+          </div>
+          <div>
+            <span className="font-bold text-gray-600">Correct</span>
+            <p className="font-bold text-emerald-600">{r.correct_answer}</p>
+          </div>
+        </div>
+      </div>
+    ))}
+</div>
+    </div>
+
+    {/* Restart button */}
+    <div className="flex justify-center mt-8">
+      <button
+        className="btn btn-submit text-xl shadow-pink-600/50 shadow-xl"
+        onClick={restartToModeSelection}
+      >
+        Select New Mode
+      </button>
+    </div>
+
+    {/* IQ badge */}
+    {roundRecords.length > 0 && roundRecords[roundRecords.length - 1].status === "summary" && (
+      <div className="mt-6 mx-auto max-w-sm p-6 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-2xl shadow-2xl shadow-pink-500/50 animate-pulse text-center font-extrabold text-2xl">
+        Score: {roundRecords[roundRecords.length - 1].iq}%
+      </div>
+    )}
+  </section>
+)}
             </>
         )}
       </main>

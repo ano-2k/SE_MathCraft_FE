@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Footer from "../components/Footer.jsx";
+import { useNavigate } from "react-router-dom";
 // --- Custom Styles to replace App.css and ensure animations work ---
 const customStyles = `
 /* Custom CSS for Animations and Scroll Reveal */
@@ -122,8 +123,13 @@ const Home = () => {
 ];
   // --- End Floating Numbers ---
 
-  const handlePlayNow = () => (window.location.href = "/login-register?tab=login");
-  const handleRegister = () => (window.location.href = "/login-register?tab=signup");
+  const navigate = useNavigate();
+
+const handlePlayNow = () => navigate("/login-register?tab=login");
+const handleRegister = () => navigate("/login-register?tab=signup");
+
+
+
 
   // --- Smooth scroll handler for "Learn More" button ---
  const handleLearnMore = () => {
@@ -467,3 +473,4 @@ const Home = () => {
 };
 
 export default Home;
+ 

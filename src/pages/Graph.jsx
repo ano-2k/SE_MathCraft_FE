@@ -279,14 +279,23 @@ const Graph = () => {
           box-shadow: 0 15px 40px rgba(0,0,0,0.1);
         }
         .chart-container {
-          position: relative;
-          height: 350px;
-        }
+  position: relative;
+  height: 250px; /* default small/mobile */
+}
+@media (min-width: 768px) {
+  .chart-container { height: 300px; } /* medium screens */
+}
+@media (min-width: 1024px) {
+  .chart-container { height: 350px; } /* large screens */
+}
+
       `}</style>
 
-      <div className="min-h-screen py-10 px-4 sm:px-12 ml-64 font-sans">
+      <div className="min-h-screen py-10 px-4 sm:px-12 lg:ml-64 font-sans">
+
         <header className="py-6 sm:py-8 text-center max-w-4xl mx-auto">
-          <h1 className="text-5xl font-extrabold text-pink-700 mb-3 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-pink-700 mb-3 mt-6 tracking-tight">
+
             📈 Performance Deep Dive
           </h1>
           <p className="text-xl text-pink-600 font-medium">
@@ -294,7 +303,8 @@ const Graph = () => {
           </p>
         </header>
 
-        <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
+        <main className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 pb-12">
+
           <ChartCard
             title="IQ Evolution (Last 10 Games)"
             icon={TrendingUp}

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import "../App.css";
 import { Eye, EyeOff } from "lucide-react";
 import Footer from "../components/Footer.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 
 const LoginRegister = () => {
   const [activeTab, setActiveTab] = useState("login");
@@ -44,6 +45,17 @@ const LoginRegister = () => {
   const [forgotStepMessage, setForgotStepMessage] = useState(""); // success/error hint
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+useEffect(() => {
+  const params = new URLSearchParams(location.search);
+  const tab = params.get("tab");
+  if (tab === "signup") {
+    setActiveTab("signup");
+  } else {
+    setActiveTab("login");
+  }
+}, [location.search]);
 
   useEffect(() => {
     // Floating numbers animation
@@ -85,9 +97,6 @@ const LoginRegister = () => {
       console.error("Anime.js not found. Include it in index.html.");
     }
 
-    // Activate tab from URL
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("tab") === "signup") setActiveTab("signup");
   }, []);
 
   // ------------------- API INTEGRATION -------------------

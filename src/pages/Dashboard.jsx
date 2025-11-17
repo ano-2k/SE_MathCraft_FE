@@ -374,7 +374,7 @@ useEffect(() => {
             <div className="p-4 bg-white rounded-xl border border-pink-200 shadow-md">
                 <div className="flex items-center space-x-2 mb-3">
                     <Icon name={iconName} className="text-xl" />
-                    <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wider">{title}</h4>
+                    <h4 className="text-sm font-bold text-gray-700 tracking-wider">{title}</h4>
                 </div>
                 <div className="space-y-2">
                     {Object.entries(breakdown).map(([mode, value]) => {
@@ -400,11 +400,11 @@ useEffect(() => {
         return (
             // Added h-full to make it stretch
             <GameCard className="flex flex-col p-4 space-y-4 h-full"> 
-                <h3 className="text-xl font-extrabold text-pink-700 border-b-2 border-purple-300 pb-2 mb-2 uppercase tracking-wider">
+                <h3 className="text-xl font-extrabold text-pink-700 border-b-2 border-purple-300 pb-2 mb-2 tracking-wider">
                     Peak Metrics Analysis
                 </h3>
                 <div className="p-4 bg-purple-50 rounded-xl border-2 border-purple-300 text-center shadow-inner">
-                    <p className="text-sm font-semibold text-gray-600 uppercase mb-4">Longest Combo Streak</p>
+                    <p className="text-sm font-semibold text-gray-600 mb-4">Longest Combo Streak</p>
 
                     <div className="flex justify-around">
                         {Object.entries(safeLongestStreak).map(([mode, value]) => (
@@ -439,7 +439,7 @@ useEffect(() => {
     // --- Core Metric Cards (Unchanged) ---
 
     const DailyStreakCard = () => (
-        <GameCard className="text-center hover:scale-[1.03] transition-transform duration-300">
+        <GameCard className="text-center transition-transform duration-300 hover:scale-[1.03] active:scale-[1.03]">
             <Icon name="Fire" className="text-pink-600 text-5xl mb-2" />
             <p className="text-4xl font-black text-pink-700">
                 {dailyStreak} {dailyStreak === 1 ? "Day" : "Days" }
@@ -473,7 +473,7 @@ useEffect(() => {
             {/* Header */}
             <div className="flex items-center mb-4 border-b border-orange-200 pb-2">
                 <FaCoins className="text-2xl text-orange-600 mr-2" />
-                <h3 className="text-xl font-extrabold text-orange-700 uppercase tracking-wider">
+                <h3 className="text-xl font-extrabold text-orange-700  tracking-wider">
                     Coin Ledger
                 </h3>
             </div>
@@ -510,7 +510,7 @@ useEffect(() => {
                 <div className="flex flex-col items-start mr-4">
                     <div className="flex items-center mb-0">
                         <LuStar className="text-lg text-teal-600 mr-1" />
-                        <h3 className="text-sm font-black text-teal-700 uppercase tracking-widest">
+                        <h3 className="text-sm font-black text-teal-700 tracking-widest">
                             Overall Score
                         </h3>
                     </div>
@@ -558,7 +558,7 @@ useEffect(() => {
             <div className="flex-grow">
               {displayData.length > 0 ? (
                 <table className="w-full text-left table-auto">
-                  <thead className="text-gray-500 text-xs uppercase border-b border-gray-300">
+                  <thead className="text-gray-500 text-xs  border-b border-gray-300">
                     <tr>
                       <th className="py-1 w-1/4">Rank</th>
                       <th className="py-1 w-1/2">User</th>
@@ -597,7 +597,7 @@ useEffect(() => {
 
       return (
         <GameCard className="lg:col-span-3 p-4">
-          <h3 className="text-2xl font-extrabold text-pink-700 border-b-2 border-purple-300 pb-2 mb-6 uppercase tracking-wider text-center">
+          <h3 className="text-2xl font-extrabold text-pink-700 border-b-2 border-purple-300 pb-2 mb-6  tracking-wider text-center">
             Global Leaderboard Rankings
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -620,7 +620,7 @@ useEffect(() => {
     <div
       className="flex items-center space-x-3 p-3 bg-white rounded-xl border-2 border-purple-400 shadow-xl transition-all duration-500 hover:scale-[1.05] glow-hover"
     >
-      <span className="text-sm font-black text-gray-700 uppercase">Current LVL</span>
+      <span className="text-sm font-black text-gray-700 ">Current Level</span>
       <span className="text-3xl font-black text-purple-700 transition-transform duration-500">
         {level}
       </span>
@@ -665,7 +665,7 @@ useEffect(() => {
         <GameCard className="lg:col-span-1 bg-gradient-to-r from-white to-pink-50 border-pink-300 hover:scale-[1.015] shadow-2xl p-4 h-full flex flex-col">
 
             <div className="flex justify-between items-start mb-4">
-                <h2 className="text-lg font-bold text-pink-600 tracking-wider uppercase">
+                <h2 className="text-lg font-bold text-pink-600 tracking-wider">
                     Monthly Performance
                 </h2>
                 {/* Month Selector */}
@@ -686,7 +686,7 @@ useEffect(() => {
                     { label: "Puzzles Played", value: currentMonthlyMetrics?.puzzlesPlayed || 0, color: "text-purple-700", size: "text-3xl" },
                 ].map((item) => (
                     <div key={item.label} className="flex items-center justify-between px-2 py-1 bg-pink-50 rounded-lg"> 
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">{item.label}</p>
+                        <p className="text-xs font-bold text-gray-500 tracking-widest">{item.label}</p>
                         <p className={`${item.size} font-black ${item.color} [text-shadow:_0_0_5px_rgba(236,72,153,0.5)]`}>
                             {item.value}
                         </p>
@@ -711,7 +711,7 @@ useEffect(() => {
             <p className="text-sm font-bold text-pink-700 mt-6 mb-3">Scores by Mode:</p>
             <div className="overflow-x-auto flex-grow">
                 <table className="min-w-full bg-white border border-purple-200 rounded-xl overflow-hidden shadow-lg text-sm">
-                    <thead className="bg-purple-100/80 text-purple-700 uppercase text-xs tracking-wider">
+                    <thead className="bg-purple-100/80 text-purple-700  text-xs tracking-wider">
                         <tr>
                             <th className="py-2 px-3 text-left">Mode</th>
                             <th className="py-2 px-3 text-right">Score</th>
@@ -747,7 +747,8 @@ useEffect(() => {
     // --- Main Render ---
 
     return (
-        <div className="min-h-screen text-gray-900 ml-64 pt-26 px-8 space-y-8 font-sans relative">
+        <div className="min-h-screen text-gray-900 md:ml-64 pt-20 md:pt-26 px-4 md:px-8 space-y-8 font-sans relative">
+
             
             {/* Background Subtle Gradient Glow */}
             <div className="absolute inset-0 opacity-40 -z-20">
@@ -762,18 +763,20 @@ useEffect(() => {
                 <div className="floating-number text-gray-400" style={{ bottom: "6rem", right: "14rem" }}>20</div>
             </div>
             
-            {/* 1. Header Greeting and Overall Score Card (Rectangular with new color) */}
-            <div className="flex items-start justify-between">
-                {/* Greeting */}
-                <div className="text-2xl pt-2">
-                    <span className="font-light text-gray-600">{greeting.split(",")[0]}, </span>
-                    <span className="font-extrabold text-pink-700">{user.name.toUpperCase()}</span>
-                </div>
-                {/* Overall Score Card - Rectangular */}
-                <div className="w-96"> 
+            {/* 1. Header Greeting and Overall Score Card */}
+<div className="flex flex-col md:flex-row items-start justify-between gap-4">
+  {/* Greeting */}
+  <div className="text-xl md:text-2xl pt-2">
+    <span className="font-light text-gray-600">{greeting.split(",")[0]}, </span>
+    <span className="font-extrabold text-pink-700">{user.name.toUpperCase()}</span>
+  </div>
+
+  {/* Overall Score Card */}
+  <div className="w-full md:w-96">  
     <OverallScoreCard score={overallScore} />
+  </div>
 </div>
-            </div>
+
 
             {/* 2. LEVEL PROGRESS BAR (Full Width) */}
             <LevelProgressCard 
@@ -786,7 +789,8 @@ useEffect(() => {
             <LeaderboardCard leaderboard={leaderboard} />
 
             {/* 4. Monthly Performance, Coin Ledger, and Peak Metrics (New 3-column grid) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
                 
                 {/* Card 1: MONTHLY PERFORMANCE SUMMARY (1/3 width) - Now has h-full */}
                 <MonthlyPerformanceSnapshot 
@@ -813,21 +817,23 @@ useEffect(() => {
             </div>
 
             {/* 5. Section 2: Recent Activity and Distribution (Unchanged Position) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
                 
                 {/* Card 3: Recent Game History - Detailed Log (2/3 width) */}
                 <GameCard className="lg:col-span-2">
                     <h3 className="text-lg font-bold text-pink-700 mb-4">
                         Recent Activity Log Stream
                     </h3>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto w-full">
+
                         <table className="w-full text-left font-mono">
                             <thead className="text-pink-500 border-b border-pink-200">
                                 <tr>
                                     <th className="py-2 text-xs uppercase tracking-wider">Time Stamp</th>
                                     <th className="py-2 text-xs uppercase tracking-wider">Mode</th>
                                     <th className="py-2 text-xs uppercase tracking-wider">Streak</th>
-                                    <th className="py-2 text-xs uppercase tracking-wider text-right">IQ Value</th>
+                                    <th className="py-2 text-xs uppercase tracking-wider text-right">Score</th>
                                 </tr>
                             </thead>
                             <tbody className="text-gray-700">

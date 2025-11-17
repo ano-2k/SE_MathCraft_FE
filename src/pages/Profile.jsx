@@ -221,14 +221,14 @@ const Profile = () => {
         ) : (
           <>
             {/* Call fetchCredentialsForEdit to set editMode to true AND fetch the latest data */}
-            <GameButton onClick={fetchCredentialsForEdit} icon={Edit2} colorClass="bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-300/50 focus:ring-pink-500" className="w-full">Modify Credentials</GameButton>
+            <GameButton onClick={fetchCredentialsForEdit} icon={Edit2} colorClass="bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-lg shadow-pink-300/50 focus:ring-pink-500" className="w-full">Update Profile</GameButton>
            <GameButton
   onClick={handleLogout}
   icon={LogOut}
   colorClass="bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-300"
   className="w-full"
 >
-  Logout System
+  Logout
 </GameButton>
 
           </>
@@ -239,8 +239,8 @@ const Profile = () => {
 
   const ProfileStatsCard = () => (
     <GameCard className="p-8 space-y-8 bg-gradient-to-br from-white to-pink-50 border-pink-300">
-      <h2 className="text-3xl font-black uppercase tracking-widest text-pink-700 border-b-2 border-purple-400/50 pb-3">
-        {editMode ? 'AGENT CREDENTIALS' : 'PERFORMANCE METRICS'}
+      <h2 className="text-3xl font-black  tracking-widest text-pink-700 border-b-2 border-purple-400/50 pb-3">
+        {editMode ? 'Account Details' : 'Performance Metrics'}
       </h2>
 
       {editMode ? (
@@ -283,13 +283,13 @@ const Profile = () => {
   );
 
   return (
-    <div className="min-h-screen py-17 px-4 sm:px-8 text-gray-900 font-sans ml-64">
+    <div className="min-h-screen py-10 px-4 sm:px-6 text-gray-900 font-sans lg:ml-64">
       <header className="py-8 text-center max-w-4xl mx-auto mb-10">
-        <h1 className="text-5xl font-extrabold text-pink-700 mb-3 tracking-tight">AGENT DATA RECORD</h1>
-        <p className="text-lg font-medium text-gray-600">Your secure connection is established. View and manage your game identity.</p>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-pink-700 mb-3 tracking-tight">Profile Details</h1>
+        <p className="text-lg font-medium text-gray-600">Manage your profile and securely view your game details.</p>
       </header>
 
-      <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1"><ProfileAvatarCard /></div>
         <div className="lg:col-span-2"><ProfileStatsCard /></div>
       </main>
