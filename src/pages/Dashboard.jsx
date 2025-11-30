@@ -1,28 +1,24 @@
 import React, { useState, useEffect } from "react";
-// --- Import react-icons for the Leaderboard and other metrics ---
 import { LuTrophy, LuMedal, LuStar, LuZap, LuShield } from 'react-icons/lu';
-import { FaCrown } from 'react-icons/fa'; // Using FaCrown for a distinct Hard mode icon
-// Import for Coins Card icons
+import { FaCrown } from 'react-icons/fa';
 import { FaCoins } from 'react-icons/fa'; 
 import { GiReceiveMoney, GiPayMoney } from 'react-icons/gi';
-import "../App.css"; // floating-number + glow-hover styles
+import "../App.css"; 
 import axios from "axios";
 const BASE_API = import.meta.env.VITE_BASE_API;
 
 
 const Icon = ({ name, className }) => {
     const icons = {
-        Fire: <span className={`${className} font-bold text-6xl leading-none text-pink-500`}>★</span>, // Star/Badge
-        Puzzle: <span className={`${className} font-bold text-6xl leading-none text-purple-500`}>◫</span>, // Puzzle/Grid
-        Target: <span className={`${className} font-bold text-6xl leading-none text-green-500`}>⊙</span>,  // Target/Circle
-        Clock: <span className={`${className} font-bold text-xl leading-none text-purple-700`}>◷</span>, // Clock
-        Zap: <span className={`${className} font-bold text-xl leading-none text-pink-700`}>⚡</span>, // Zap/Lightning
-        Shield: <span className={`${className} font-bold text-xl leading-none text-green-700`}>🛡️</span>, // Shield/Mastery
+        Fire: <span className={`${className} font-bold text-6xl leading-none text-pink-500`}>★</span>, 
+        Puzzle: <span className={`${className} font-bold text-6xl leading-none text-purple-500`}>◫</span>, 
+        Target: <span className={`${className} font-bold text-6xl leading-none text-green-500`}>⊙</span>,  
+        Clock: <span className={`${className} font-bold text-xl leading-none text-purple-700`}>◷</span>, 
+        Zap: <span className={`${className} font-bold text-xl leading-none text-pink-700`}>⚡</span>, 
+        Shield: <span className={`${className} font-bold text-xl leading-none text-green-700`}>🛡️</span>, 
     };
     return icons[name] || null;
 };
-
-// ------------------------------------------------------------------------------------------
 
 const Dashboard = () => {
     // --- Initial State (Cleaned) ---
@@ -35,20 +31,19 @@ const Dashboard = () => {
         accuracy: 0.0,
         totalPuzzlesSolved: 0,
         currentIQ: 0,
-        progress_count: 0, // Added for LevelProgressCard
-        max_count: 5,      // Added for LevelProgressCard
+        progress_count: 0, 
+        max_count: 5,     
         monthlyMetrics: {},
         monthlyIQs: {},
         puzzlesByDifficulty: { Easy: 0, Intermediate: 0, Hard: 0 },
         recentGames: [],
     });
 
-    // --- NEW STATE for Total Coins (Since you mentioned they are overall/stable) ---
     const [totalCoins, setTotalCoins] = useState({
         earned: 0,
         spent: 0,
     });
-
+    const [isLoading, setIsLoading] = useState(true);
     const [month, setMonth] = useState(new Date().toISOString().slice(0, 7)); 
     const [leaderboard, setLeaderboard] = useState({
         easy: [],
@@ -56,7 +51,6 @@ const Dashboard = () => {
         hard: [],
     });
     const [peakMetrics, setPeakMetrics] = useState({
-        // Updated structure based on user's reference
         longestStreak: { Easy: 0, Intermediate: 0, Hard: 0 }, 
         fastestPuzzle: { Easy: '0s', Intermediate: '0s', Hard: '0s' },
         highestModeMastery: { Easy: '0%', Intermediate: '0%', Hard: '0%' },
@@ -64,8 +58,7 @@ const Dashboard = () => {
     const [greeting, setGreeting] = useState("");
     const [overallScore, setOverallScore] = useState(0);
 
-    // --- API Calls (Unchanged) ---
-
+    window.history.scrollRestoration = 'manual';
     // Fetch Mode Counts
     useEffect(() => {
         const fetchUserData = async () => {
@@ -118,13 +111,13 @@ const Dashboard = () => {
       const coinsEarned = data.total_coins_earned || 0; 
       const coinsSpent = data.total_coins_spent || 0;   
 
-      // Update Total Coins (using monthly API data for initial display as requested)
+      // Update Total Coins 
       setTotalCoins({
         earned: coinsEarned, 
         spent: coinsSpent,   
       });
 
-      // Update Monthly Metrics (excluding coins)
+      // Update Monthly Metrics 
       setUser((prev) => ({
         ...prev,
         monthlyMetrics: {
@@ -151,7 +144,6 @@ const Dashboard = () => {
       }));
     } catch (error) {
       console.error("Failed to fetch monthly performance:", error);
-      // Graceful fallback
       setUser((prev) => ({
         ...prev,
         monthlyMetrics: {
@@ -171,7 +163,6 @@ const Dashboard = () => {
   fetchMonthlyPerformance();
 }, [month]);
 
-    // Fetch Recent Games, User Level, Daily Streak, Total Puzzles, Overall Accuracy, Leaderboard, Greeting (Unchanged)
     useEffect(() => {
         const fetchRecentGames = async () => {
             try {
@@ -186,30 +177,6 @@ const Dashboard = () => {
         };
         fetchRecentGames();
     }, []);
-
-   useEffect(() => {
-    const fetchUserLevel = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) return;
-
-            const res = await axios.get(`${BASE_API}/api/user-level/`, {
-                headers: { Authorization: `Token ${token}` },
-            });
-
-            setUser(prev => ({ 
-                ...prev, 
-                level: res.data.level || 1,
-                progress_count: res.data.progress_count || 0,
-                max_count: res.data.max_count || 5
-            }));
-        } catch (err) {
-            console.error("Failed to fetch user level:", err);
-        }
-    };
-    fetchUserLevel();
-}, []);
-
 
     const fetchStat = (endpoint) => {
         const token = localStorage.getItem("token");
@@ -249,25 +216,36 @@ const Dashboard = () => {
         fetchLeaderboard();
     }, []);
 
-    useEffect(() => {
-    const fetchGreeting = async () => {
+   useEffect(() => {
+    const fetchCriticalData = async () => {
         const token = localStorage.getItem("token");
         if (!token) {
+            setIsLoading(false); 
             return;
         }
 
         try {
-            const res = await axios.get(`${BASE_API}/api/greeting/`, {
-                headers: { Authorization: `Token ${token}` },
-            });
-            const { greet, username } = res.data || {};
-            setGreeting(greet || "Hello");
-            setUser(prev => ({ ...prev, name: username || prev.name }));
+            const [levelRes, greetingRes] = await Promise.all([
+                axios.get(`${BASE_API}/api/user-level/`, { headers: { Authorization: `Token ${token}` } }),
+                axios.get(`${BASE_API}/api/greeting/`, { headers: { Authorization: `Token ${token}` } })
+            ]);
+
+            setUser(prev => ({ 
+                ...prev, 
+                level: levelRes.data.level || 1,
+                progress_count: levelRes.data.progress_count || 0,
+                max_count: levelRes.data.max_count || 5,
+                name: greetingRes.data.username || prev.name,
+            }));
+            setGreeting(greetingRes.data.greet || "Hello");
+
         } catch (err) {
-            console.error("Failed to fetch greeting:", err);
+            console.error("Failed to fetch critical user data:", err);
+        } finally {
+            setIsLoading(false); 
         }
     };
-    fetchGreeting();
+    fetchCriticalData();
 }, []);
 
 useEffect(() => {
@@ -290,7 +268,7 @@ useEffect(() => {
 }, []);
 
 
-    // --- Anime.js Floating numbers (Remains unchanged) ---
+    // --- Anime.js Floating numbers  ---
     useEffect(() => {
         if (typeof window.anime !== "undefined") {
             document.querySelectorAll(".floating-number").forEach((el, index) => {
@@ -323,11 +301,30 @@ useEffect(() => {
             });
         } else console.error("Anime.js not found. Include it in index.html.");
     }, []);
-    // --------------------------------------------------------
+
+  useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
 
     if (!user) return null;
 
-    // Destructure required user variables (relying on state, which gets updated from API)
+if (isLoading) {
+    return (
+        <div 
+            className="absolute inset-0 z-50 bg-pink-50 text-pink-700"
+        >
+            <div 
+                className="min-h-screen flex items-center justify-center md:ml-64"
+            >
+                <div className="text-center">
+                    <LuZap className="animate-spin text-6xl mb-2 mx-auto" /> 
+                    <p className="text-lg font-semibold">Loading Dashboard Data...</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
     const { dailyStreak, accuracy, totalPuzzlesSolved, level, xp, xpToNextLevel, currentIQ } = user;
     
     const currentMonthlyMetrics = user.monthlyMetrics[month] || {
@@ -350,10 +347,7 @@ useEffect(() => {
         }
     });
     const safeLongestStreakDisplay = { value: maxStreak, mode: maxStreakMode };
-    // --- END FIX ---
 
-
-    // --- Utility Components for the Theme ---
 
     const GameCard = ({ children, className = "" }) => (
         <div
@@ -391,14 +385,13 @@ useEffect(() => {
         );
     };
 
-   // --- Card 2: Peak Metrics (Fixed to utilize full height) ---
+   // --- Card 2: Peak Metrics ---
     const PeakMetricsCard = ({ longestStreak, fastestPuzzle, highestModeMastery }) => {
         const safeLongestStreak = longestStreak || { Easy: 0, Intermediate: 0, Hard: 0 };
         const safeFastestPuzzle = fastestPuzzle || { Easy: '0s', Intermediate: '0s', Hard: '0s' };
         const safeHighestMastery = highestModeMastery || { Easy: '0%', Intermediate: '0%', Hard: '0%' };
 
         return (
-            // Added h-full to make it stretch
             <GameCard className="flex flex-col p-4 space-y-4 h-full"> 
                 <h3 className="text-xl font-extrabold text-pink-700 border-b-2 border-purple-300 pb-2 mb-2 tracking-wider">
                     Peak Metrics Analysis
@@ -416,8 +409,6 @@ useEffect(() => {
                     </div>
                 </div>
 
-
-                {/* Ensure the rest of the content takes available space */}
                 <div className="grid grid-cols-1 gap-4 pt-2 flex-grow"> 
                     <DetailedKeyStat 
                         title="Fastest Puzzle Time"
@@ -436,7 +427,7 @@ useEffect(() => {
 
 
     
-    // --- Core Metric Cards (Unchanged) ---
+    // --- Core Metric Cards ---
 
     const DailyStreakCard = () => (
         <GameCard className="text-center transition-transform duration-300 hover:scale-[1.03] active:scale-[1.03]">
@@ -464,10 +455,8 @@ useEffect(() => {
         </GameCard>
     );
 
-    // --- Coin Ledger Card (Account Total) - FIXED TO FILL HEIGHT ---
+    // --- Coin Ledger Card ---
     const CoinsManagementCard = ({ earned, spent }) => (
-        // REMOVED: max-w-xs mx-auto to allow it to fill the column space
-        // ADDED: h-full to make it match the height of neighbors in the grid
         <GameCard className="bg-gradient-to-br from-yellow-50 to-orange-100 border-orange-300 shadow-lg hover:scale-[1.01] transition-transform p-6 flex flex-col justify-between h-full">
             
             {/* Header */}
@@ -501,12 +490,10 @@ useEffect(() => {
     );
 
 
-    // --- Overall Score Card (New Color Scheme: Teal/Green) ---
+    // --- Overall Score Card ---
     const OverallScoreCard = ({ score }) => (
         <GameCard className="!p-3 bg-teal-50 border-teal-300 shadow-lg text-center h-auto">
             <div className="flex items-center justify-between">
-                
-                {/* Title Block */}
                 <div className="flex flex-col items-start mr-4">
                     <div className="flex items-center mb-0">
                         <LuStar className="text-lg text-teal-600 mr-1" />
@@ -516,8 +503,6 @@ useEffect(() => {
                     </div>
                     <p className="text-xs text-gray-500 mt-0">Combined total across all modes.</p>
                 </div>
-
-                {/* Score Value Block */}
                 <div className="p-1.5 bg-white rounded-lg border-2 border-teal-400 min-w-[100px]">
                     <p className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-green-600 ">
                         {score}
@@ -529,16 +514,14 @@ useEffect(() => {
     );
 
 
-    // --- Leaderboard Component (Added Hover Effect) ---
+    // --- Leaderboard Component ---
     const LeaderboardCard = ({ leaderboard }) => {
-      // Configuration updated to use React Icons
       const modeConfig = {
         easy: { title: "Easy Mode", icon: <LuZap className="text-2xl" />, bg: "bg-green-50", border: "border-green-300", text: "text-green-700", iqClass: "text-green-600" },
         intermediate: { title: "Intermediate Mode", icon: <LuTrophy className="text-2xl" />, bg: "bg-yellow-50", border: "border-yellow-300", text: "text-yellow-700", iqClass: "text-yellow-600" },
         hard: { title: "Hard Mode", icon: <FaCrown className="text-2xl" />, bg: "bg-red-50", border: "border-red-300", text: "text-red-700", iqClass: "text-red-600" },
       };
 
-      // Rank Icons updated to use React Icons
       const getMedal = (rank, colorClass = "text-gray-500") => {
         if (rank === 1) return <LuMedal className={`text-yellow-500 text-lg`} />;
         if (rank === 2) return <LuMedal className={`text-gray-400 text-lg`} />;
@@ -548,7 +531,7 @@ useEffect(() => {
 
       const ModeLeaderboard = ({ mode, data }) => {
         const config = modeConfig[mode];
-        const displayData = data.slice(0, 5); // Ensure max 5 rows
+        const displayData = data.slice(0, 5); 
 
         return (
           <div className={`p-4 rounded-xl shadow-inner ${config.bg} border-2 ${config.border} flex flex-col h-full`}>
@@ -569,7 +552,6 @@ useEffect(() => {
                     {displayData.map((user, i) => (
                       <tr 
                         key={i} 
-                        // ADDED HOVER EFFECT HERE
                         className={`border-b border-gray-200 last:border-b-0 ${i % 2 === 0 ? 'bg-white/50' : ''} transition duration-150 hover:bg-purple-100/60 cursor-pointer`}
                       >
                         <td className={`py-2 font-black text-sm flex items-center`}>
@@ -609,14 +591,13 @@ useEffect(() => {
       );
     };
 
-    // --- LEVEL PROGRESS CARD COMPONENT (Unchanged) ---
+    // --- LEVEL PROGRESS CARD---
     const LevelProgressCard = ({ level, correctStreak, maxStreak }) => {
         const progressPercentage = (correctStreak / maxStreak) * 100;
         
         return (
             <GameCard className="!p-4 bg-pink-50 border-pink-300 shadow-lg h-full">
   <div className="flex items-center justify-between h-full">
-    {/* Level Card (Rectangular with animation) */}
     <div
       className="flex items-center space-x-3 p-3 bg-white rounded-xl border-2 border-purple-400 shadow-xl transition-all duration-500 hover:scale-[1.05] glow-hover"
     >
@@ -659,16 +640,14 @@ useEffect(() => {
     };
 
 
-    // --- Monthly Performance Snapshot (Unchanged from previous modification) ---
+    // --- Monthly Performance Snapshot ---
     const MonthlyPerformanceSnapshot = ({ month, currentMonthlyMetrics, monthlyIQ, setMonth }) => (
-        // Added h-full to make it stretch
         <GameCard className="lg:col-span-1 bg-gradient-to-r from-white to-pink-50 border-pink-300 hover:scale-[1.015] shadow-2xl p-4 h-full flex flex-col">
 
             <div className="flex justify-between items-start mb-4">
                 <h2 className="text-lg font-bold text-pink-600 tracking-wider">
                     Monthly Performance
                 </h2>
-                {/* Month Selector */}
                 <div className="text-right p-1 bg-pink-100/70 rounded-xl border border-pink-300">
                     <input
                         type="month"
@@ -679,7 +658,7 @@ useEffect(() => {
                 </div>
             </div>
 
-            {/* Main Metrics (Vertical stack for space saving) */}
+            {/* Main Metrics */}
             <div className="flex flex-col space-y-3 border-b pb-3 border-pink-200">
                 {[
                     { label: "Monthly Score", value: monthlyIQ || 0, color: "bg-gradient-to-r from-pink-600 to-purple-700 text-transparent bg-clip-text", size: "text-4xl" },
@@ -707,7 +686,7 @@ useEffect(() => {
                 ))}
             </div>
 
-            {/* 💖 Scores by Mode Table */}
+            {/* Scores by Mode Table */}
             <p className="text-sm font-bold text-pink-700 mt-6 mb-3">Scores by Mode:</p>
             <div className="overflow-x-auto flex-grow">
                 <table className="min-w-full bg-white border border-purple-200 rounded-xl overflow-hidden shadow-lg text-sm">
@@ -744,18 +723,12 @@ useEffect(() => {
         </GameCard>
     );
 
-    // --- Main Render ---
-
     return (
-        <div className="min-h-screen text-gray-900 md:ml-64 pt-20 md:pt-26 px-4 md:px-8 space-y-8 font-sans relative">
+       <div className="min-h-screen text-gray-900 md:ml-64 pt-12 md:pt-16 px-4 md:px-8 space-y-8 font-sans relative">
 
-            
-            {/* Background Subtle Gradient Glow */}
             <div className="absolute inset-0 opacity-40 -z-20">
                 <div className="w-1/2 h-full bg-pink-200 rounded-full blur-3xl mx-auto -translate-y-1/4"></div>
             </div>
-            
-            {/* Floating numbers (Subtle background texture) */}
             <div className="absolute inset-0 pointer-events-none -z-10">
                 <div className="floating-number text-gray-400" style={{ top: "5rem", left: "8rem" }}>3</div>
                 <div className="floating-number text-gray-400" style={{ top: "8rem", right: "8rem" }}>7</div>
@@ -763,7 +736,6 @@ useEffect(() => {
                 <div className="floating-number text-gray-400" style={{ bottom: "6rem", right: "14rem" }}>20</div>
             </div>
             
-            {/* 1. Header Greeting and Overall Score Card */}
 <div className="flex flex-col md:flex-row items-start justify-between gap-4">
   {/* Greeting */}
   <div className="text-xl md:text-2xl pt-2">
@@ -778,21 +750,21 @@ useEffect(() => {
 </div>
 
 
-            {/* 2. LEVEL PROGRESS BAR (Full Width) */}
+            {/* 2. LEVEL PROGRESS BAR  */}
             <LevelProgressCard 
                 level={user.level} 
                 correctStreak={user.progress_count || 0} 
                 maxStreak={user.max_count || 5} 
             />
 
-            {/* 3. Global Leaderboard Rankings (MOVED UP) */}
+            {/* 3. Global Leaderboard Rankings */}
             <LeaderboardCard leaderboard={leaderboard} />
 
-            {/* 4. Monthly Performance, Coin Ledger, and Peak Metrics (New 3-column grid) */}
+            {/* 4. Monthly Performance, Coin Ledger, and Peak Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 
-                {/* Card 1: MONTHLY PERFORMANCE SUMMARY (1/3 width) - Now has h-full */}
+                {/* Card 1: MONTHLY PERFORMANCE SUMMARY  */}
                 <MonthlyPerformanceSnapshot 
                     month={month} 
                     currentMonthlyMetrics={currentMonthlyMetrics} 
@@ -800,7 +772,7 @@ useEffect(() => {
                     setMonth={setMonth}
                 />
 
-                {/* Card 2: Coin Ledger (MIDDLE) - Now fills height */}
+                {/* Card 2: Coin Ledger */}
                 <div className="lg:col-span-1">
                     <CoinsManagementCard 
                         earned={totalCoins.earned} 
@@ -808,7 +780,7 @@ useEffect(() => {
                     />
                 </div>
 
-                {/* Card 3: Peak Metrics (1/3 width) - Now has h-full */}
+                {/* Card 3: Peak Metrics */}
                 <PeakMetricsCard 
                     longestStreak={peakMetrics.longestStreak}
                     fastestPuzzle={peakMetrics.fastestPuzzle}
@@ -816,11 +788,11 @@ useEffect(() => {
                 />
             </div>
 
-            {/* 5. Section 2: Recent Activity and Distribution (Unchanged Position) */}
+            {/* 5. Section 2: Recent Activity and Distribution */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 
-                {/* Card 3: Recent Game History - Detailed Log (2/3 width) */}
+                {/* Card 3: Recent Game History */}
                 <GameCard className="lg:col-span-2">
                     <h3 className="text-lg font-bold text-pink-700 mb-4">
                         Recent Activity Log Stream
@@ -870,7 +842,7 @@ useEffect(() => {
                     </div>
                 </GameCard>
 
-                {/* Card 4: Difficulty Distribution - Progress Visuals (1/3 width) */}
+                {/* Card 4: Difficulty Distribution */}
                 <GameCard>
                     <h3 className="text-lg font-bold text-gray-700 mb-4">
                         Mission Difficulty Breakdown (Overall)
@@ -897,7 +869,6 @@ useEffect(() => {
                                             {count}
                                         </span>
                                     </div>
-                                    {/* Progress Bar with Gradient and Shadow */}
                                     <div className="w-full bg-pink-100 rounded-full h-2 shadow-inner">
                                         <div 
                                             className={`h-2 rounded-full shadow-md ${colorClasses.split(' ').slice(1).join(' ')}`}
@@ -911,7 +882,7 @@ useEffect(() => {
                 </GameCard>
             </div>
             
-            {/* 6. Section 3: New Unique Metric Cards (Unchanged Position) */}
+            {/* 6. New Unique Metric Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <DailyStreakCard />
                 <TotalPuzzlesCard />
