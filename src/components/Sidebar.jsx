@@ -13,10 +13,17 @@ const Sidebar = ({ setPage, page }) => {
   ];
 
   const handleNavigation = (key) => {
-    setPage(key);
-    localStorage.setItem("mc_current_page", key);
-    setIsOpen(false); // Close mobile menu
-  };
+  setPage(key);
+  localStorage.setItem("mc_current_page", key);
+  setIsOpen(false); 
+
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: "smooth",
+  });
+};
+
 
   useEffect(() => {
     const savedPage = localStorage.getItem("mc_current_page");
@@ -101,7 +108,6 @@ const Sidebar = ({ setPage, page }) => {
         </div>
       </aside>
 
-      {/* --- Mobile Overlay (click to close) --- */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden z-30"

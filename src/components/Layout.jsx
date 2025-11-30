@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// Assuming component files have the .jsx extension for robust imports
 import Sidebar from "./Sidebar.jsx";
 import Header from "./Header.jsx";
 import Footer from "./Footer.jsx";  
@@ -10,13 +9,11 @@ import Graph from "../pages/Graph.jsx";
 import Profile from "../pages/Profile.jsx";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import ScrollToTopOnMount from "./ScrollToTopOnMount.jsx"; 
 
-// Function to check local storage for the last visited page
+
 const getInitialPage = () => {
-  // Try to retrieve the saved page key.
   const savedPage = localStorage.getItem('mc_current_page');
-  
-  // Return the saved page key, or default to 'dashboard'.
   return savedPage || "dashboard";
 };
 
@@ -37,7 +34,7 @@ const Layout = () => {
     localStorage.setItem("mc_current_page", page);
   }, [page]);
 
-  // Pass page to Header for dynamic title
+
   const getPageTitle = () => {
     switch (page) {
       case "dashboard": return "Dashboard";
@@ -50,7 +47,7 @@ const Layout = () => {
     }
   };
 
-  // Decide which component to render
+
   const renderContent = () => {
     switch (page) {
       case "dashboard": return <Dashboard />;
@@ -65,12 +62,13 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-white via-pink-100 to-pink-200 font-sans relative overflow-hidden">
+      <ScrollToTopOnMount />  
       <Sidebar setPage={setPage} page={page} />
       <div className="flex-1 flex flex-col">
-        {/* NOTE: You'll need to pass 'coins' and 'coinAnimation' props to Header 
-            from Layout's state if you implement coin logic here. */}
         <Header pageTitle={getPageTitle()} setPage={setPage} coins={1200} coinAnimation={null} /> 
-        <main className="flex-1 p-8 pt-28 overflow-auto">{renderContent()}</main><Footer />
+        <main className="flex-1 p-8 pt-28 overflow-auto">{renderContent()}</main><div className="lg:pl-[250px]">
+  <Footer />
+</div>
       </div>
 
       {/* Floating numbers */}

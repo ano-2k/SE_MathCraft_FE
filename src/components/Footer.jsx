@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 
-// --- Social Icons (Only the requested ones) ---
 const InstagramIcon = (props) => (
   <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
@@ -34,18 +33,17 @@ const Footer = () => {
 
   const exploreLinks = [
     { name: "Dashboard", href: "#dashboard" },
-    { name: "Mechanics", href: "#mechanics" },
+    { name: "Games", href: "#mechanics" },
     { name: "Achievements", href: "#explore-journey" },
+    { name: "Graph", href: "#explore-journey" },
+    { name: "Profile", href: "#explore-journey" },
   ];
 
   return (
     <footer className="bg-pink-50 text-gray-700 mt-12 border-t border-pink-100 shadow-lg">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-
-        {/* Top Section: Links Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8 border-b border-pink-200 pb-8 mb-8">
 
-          {/* Logo/Brand */}
           <div className="col-span-2 md:col-span-1">
             <h3 className="text-2xl font-extrabold tracking-tight text-pink-700">
               MathCraft
@@ -69,7 +67,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Explore Links */}
           <div>
             <h4 className="text-base font-semibold text-pink-700 mb-4">Explore</h4>
             <ul className="space-y-3">
@@ -84,31 +81,28 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom Section */}
         <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-          {/* Copyright */}
           <p className="text-sm text-gray-500 mb-6 md:mb-0">
             &copy; {currentYear} MathCraft. All rights reserved.
           </p>
 
-          {/* Social Icons */}
           <div className="flex space-x-6">
             <a 
-              href="#" 
+              href="https://www.instagram.com/a.n.o._.2k/?igsh=eGxkNHAxaTdyNW5v&utm_source=qr" 
               className="text-pink-500 hover:text-pink-700 transition-colors duration-200"
               aria-label="Follow us on Instagram"
             >
               <InstagramIcon className="w-6 h-6" />
             </a>
             <a 
-              href="#" 
+              href="https://www.facebook.com/share/17JR2TUFrx/?mibextid=wwXIfr" 
               className="text-pink-500 hover:text-pink-700 transition-colors duration-200"
               aria-label="Like us on Facebook"
             >
               <FacebookIcon className="w-6 h-6" />
             </a>
             <a 
-              href="#" 
+              href="https://www.youtube.com/@ano_2k" 
               className="text-pink-500 hover:text-pink-700 transition-colors duration-200"
               aria-label="Subscribe to us on YouTube"
             >

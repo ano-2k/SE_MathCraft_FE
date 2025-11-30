@@ -5,14 +5,11 @@ import { Award, Edit2, LogOut } from "lucide-react";
 const BASE_API = import.meta.env.VITE_BASE_API;
 const LOCAL_STORAGE_KEY_USER = "mc_user_v1";
 
-/* --------------------------------------------------------------
-   1. Achievement Notification
-   -------------------------------------------------------------- */
+
+   // Achievement Notification
 const AchievementNotification = ({ isVisible, badgeNames }) => {
   const badgeCount = badgeNames?.length || 0;
   if (!badgeCount) return null;
-
-  // Fix underscore → space
   const cleanNames = badgeNames.map(n => n.replace(/_/g, ' '));
   const message =
     badgeCount === 1
@@ -36,9 +33,8 @@ const AchievementNotification = ({ isVisible, badgeNames }) => {
     </div>
   );
 };
-/* --------------------------------------------------------------
-   2. Coin Notification + Zoom Animation
-   -------------------------------------------------------------- */
+
+   // Coin Notification + Zoom Animation
 const CoinNotification = ({ amount, type, triggerKey }) => {
   if (!triggerKey || amount === 0) return null;
 
@@ -84,9 +80,8 @@ const CoinNotification = ({ amount, type, triggerKey }) => {
   );
 };
 
-/* --------------------------------------------------------------
-   3. useCoins Hook
-   -------------------------------------------------------------- */
+
+   // useCoins Hook
 export const useCoins = () => {
   const [coins, setCoins] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -166,9 +161,7 @@ export const useCoins = () => {
   return { coins, loading, coinAnimation, achievementNotification };
 };
 
-/* --------------------------------------------------------------
-   4. Header Component – FINAL FIXED VERSION
-   -------------------------------------------------------------- */
+   // Header Component
 const Header = ({ pageTitle, setPage, enterEditMode }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState("");
@@ -178,7 +171,6 @@ const Header = ({ pageTitle, setPage, enterEditMode }) => {
   const coinRef = useRef(null);
   const profileRef = useRef(null);
 
-  // Zoom coin on hover (desktop) or tap (mobile)
   const addZoom = () => coinRef.current?.classList.add("animate-zoom");
   const removeZoom = () => coinRef.current?.classList.remove("animate-zoom");
   const tapZoom = () => {
@@ -186,7 +178,14 @@ const Header = ({ pageTitle, setPage, enterEditMode }) => {
     setTimeout(removeZoom, 450);
   };
 
-  // Close dropdown when clicking outside
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: "smooth",
+  });
+};
+
   useEffect(() => {
     const handler = (e) => {
       if (dropdownOpen && profileRef.current && !profileRef.current.contains(e.target)) {
@@ -200,7 +199,7 @@ const Header = ({ pageTitle, setPage, enterEditMode }) => {
   // Fetch current month & profile photo
   useEffect(() => {
     const now = new Date();
-    setCurrentMonth(now.toISOString().slice(0, 7));
+    setCurrentMonth(now.toISOString().slice(0, 10));
 
     const fetchPhoto = async () => {
       try {
@@ -243,7 +242,7 @@ const Header = ({ pageTitle, setPage, enterEditMode }) => {
 
       <div className="flex items-center justify-between px-4 md:px-8 py-3 md:py-4">
         <div className="flex items-center gap-6">
-          <div className="text-2xl font-bold text-pink-600 md:block hidden">MathCraft</div>
+          
           <div className="text-lg font-semibold text-gray-700">{pageTitle}</div>
         </div>
 
@@ -279,6 +278,7 @@ const Header = ({ pageTitle, setPage, enterEditMode }) => {
                     setDropdownOpen(false);
                     setPage("profileEdit");
                     enterEditMode();
+                    scrollToTop();
                   }}
                   className="w-full flex items-center gap-2 px-4 py-2 hover:bg-pink-50"
                 >
