@@ -2,14 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Glow hover effect for buttons */
 .glow-hover:hover {
   box-shadow: 0 0 15px rgba(236, 72, 153, 0.7), 0 0 30px rgba(236, 72, 153, 0.5);
   transform: scale(1.05);
   transition: all 0.3s ease-in-out;
 }
 
-/* Fade-in animation */
 .animate-fade-in {
   opacity: 0;
   animation: fadeIn 1s ease-in forwards;
@@ -20,7 +18,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Floating numbers style */
 .floating-number {
   position: absolute;
   font-size: 3rem;

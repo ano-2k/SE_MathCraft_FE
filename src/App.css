@@ -112,12 +112,10 @@ html {
   transform-origin: center;
 }
 
-/* Custom utility for the Hero Text */
 .hero-text-animate {
     opacity: 0;
     transform: translateY(20px);
     animation: fadeInSlideUp 1.2s ease-out forwards;
-    /* This delay allows staggered appearance */
     animation-delay: var(--animation-delay, 0s); 
 }
 
@@ -132,23 +130,17 @@ html {
     }
 }
 
-/* * CSS for Scroll Reveal Animation
-* This works with the Intersection Observer in Home.jsx
-*/
 .scroll-reveal-item {
-    /* Base state: invisible and translated down */
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 1s ease-out, transform 1s ease-out;
 }
 
 .scroll-reveal-item.is-visible {
-    /* Visible state: fully opaque and in original position */
     opacity: 1;
     transform: translateY(0);
 }
 
-/* Custom spin for the Hero section placeholder */
 .animate-spin-slow {
     animation: spin 8s linear infinite;
 }
@@ -160,4 +152,43 @@ html {
     to {
         transform: rotate(360deg);
     }
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideInFromTop 0.5s ease-out forwards;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInDown {
+  animation: fadeInDown 0.3s ease-out forwards;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }

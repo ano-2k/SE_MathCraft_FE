@@ -6,6 +6,8 @@ import LoginRegister from "./pages/LoginRegister";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import Layout from "./components/Layout"; 
 import Graph from "./pages/Graph";
+import About from "./pages/About";
+
 import "./App.css";
 
 const isLoggedIn = () => !!localStorage.getItem("token"); 
@@ -18,13 +20,12 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* 🏠 Public Home page (before login/register) */}
         <Route path="/" element={<Home />} />
+        
+        <Route path="/about" element={<About />} />
 
-        {/* 🔑 Login / Register */}
         <Route path="/login-register" element={<LoginRegister />} />
 
-        {/* 🔒 Private routes (after successful login) */}
         <Route
           path="/dashboard/*"
           element={
@@ -33,15 +34,13 @@ function App() {
             </PrivateRoute>
           }
         />
-         {/* Example: Graph page route */}
+
         <Route path="/graph" element={
           <PrivateRoute>
             <Graph />
           </PrivateRoute>
         } />
         <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
-
-        {/* Fallback redirect (any unknown path → Home) */}
 
         <Route path="*" element={<Navigate to="/" />} />
         

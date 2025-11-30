@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../App.css";
 import { Eye, EyeOff } from "lucide-react";
 import Footer from "../components/Footer.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
+import Navbar from "../components/Navbar.jsx"; 
 
 
 const LoginRegister = () => {
-  const [activeTab, setActiveTab] = useState("login");
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [message, setMessage] = useState(""); // Inline message
-  const [messageType, setMessageType] = useState(""); // "success" or "error"
+  const [message, setMessage] = useState(""); 
+  const [messageType, setMessageType] = useState(""); 
+  const [signupErrors, setSignupErrors] = useState({});
 
-  // Password visibility
+  const [isLongEnough, setIsLongEnough] = useState(false);
+  const [hasCapital, setHasCapital] = useState(false);
+  const [hasNumber, setHasNumber] = useState(false);
+  const [hasSpecial, setHasSpecial] = useState(false);
+
+  const [isConfirmMatch, setIsConfirmMatch] = useState(false);
+  
+  const [flashStatus, setFlashStatus] = useState(null); 
+
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
@@ -42,20 +50,29 @@ const LoginRegister = () => {
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [forgotUsername, setForgotUsername] = useState(""); // store attempted username
   const [forgotEmail, setForgotEmail] = useState("");
-  const [forgotStepMessage, setForgotStepMessage] = useState(""); // success/error hint
+  const [forgotStepMessage, setForgotStepMessage] = useState(""); 
 
   const navigate = useNavigate();
   const location = useLocation();
-
-useEffect(() => {
   const params = new URLSearchParams(location.search);
-  const tab = params.get("tab");
-  if (tab === "signup") {
-    setActiveTab("signup");
-  } else {
-    setActiveTab("login");
-  }
-}, [location.search]);
+  const initialTab = params.get("tab") === "signup" ? "signup" : "login";
+  const [activeTab, setActiveTab] = useState(initialTab);
+  
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab === "signup") setActiveTab("signup");
+    else if (tab === "login") setActiveTab("login");
+  }, [location.search]);
+
+  useEffect(() => {
+    scrollToTop();
+  }, [activeTab]);
+
 
   useEffect(() => {
     // Floating numbers animation
@@ -101,6 +118,60 @@ useEffect(() => {
 
   // ------------------- API INTEGRATION -------------------
 
+  const validateSignup = (data = signupData) => {
+    const errors = {};
+    const { password, confirmPassword } = data;
+    const p = password; 
+    const oldStatus = { isLongEnough, hasCapital, hasNumber, hasSpecial, isConfirmMatch };
+
+    // --- 1. Password Complexity Check & State Update ---
+    
+    const long = p.length >= 8;
+    const capital = /[A-Z]/.test(p);
+    const number = /[0-9]/.test(p);
+    const special = /[!@#$%^&*(),.?":{}|<>]/.test(p);
+    const checkAndFlash = (current, setFunction, name) => {
+      if (current && !oldStatus[name]) {
+        setFlashStatus(name);
+        setTimeout(() => setFlashStatus(null), 1500);
+      }
+      setFunction(current);
+    };
+
+    checkAndFlash(long, setIsLongEnough, 'isLongEnough');
+    checkAndFlash(capital, setHasCapital, 'hasCapital');
+    checkAndFlash(number, setHasNumber, 'hasNumber');
+    checkAndFlash(special, setHasSpecial, 'hasSpecial');
+
+    const isComplex = long && capital && number && special;
+    
+    if (!isComplex && p.length > 0) {
+        if (!long) errors.password = "Password must be at least 8 characters.";
+        else if (!capital) errors.password = "Password must contain at least one capital letter.";
+        else if (!number) errors.password = "Password must contain at least one number.";
+        else if (!special) errors.password = "Password must contain at least one special character.";
+    }
+
+
+    // --- 2. Confirm Password Match Check ---
+    const matches = p === confirmPassword && confirmPassword.length > 0;
+
+    if (matches && !oldStatus.isConfirmMatch) {
+      setFlashStatus('isConfirmMatch');
+      setTimeout(() => setFlashStatus(null), 1500);
+    }
+    setIsConfirmMatch(matches);
+
+    if (p.length > 0 && confirmPassword.length > 0 && p !== confirmPassword) {
+        errors.confirmPassword = "Passwords do not match.";
+    }
+
+    setSignupErrors(errors);
+    
+    return isComplex && matches;
+  };
+
+
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -121,8 +192,8 @@ useEffect(() => {
         setTimeout(() => navigate("/dashboard"), 500);
       } else {
         setMessageType("error");
-        setMessage("Login failed. Please try again later.");
-        setForgotUsername(loginData.username); // store attempted username for forgot password
+        setMessage("Username or Password Incorrect.");
+        setForgotUsername(loginData.username); 
       }
     } catch (err) {
       console.error(err);
@@ -134,6 +205,12 @@ useEffect(() => {
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+    setSignupErrors({}); 
+    
+    if (!validateSignup()) { 
+      return; 
+    }
+    
     try {
       const res = await fetch(`${apiBase}/api/register/`, {
         method: "POST",
@@ -150,7 +227,7 @@ useEffect(() => {
       if (res.ok) {
         setMessageType("success");
         setMessage("Signup successful! Please login.");
-        setActiveTab("login");
+        navigate("/login-register?tab=login", { replace: true }); 
         setLoginData({ username: signupData.username, password: "" });
       } else {
         setMessageType("error");
@@ -187,41 +264,13 @@ useEffect(() => {
       setForgotStepMessage("Something went wrong. Try again.");
     }
   };
-
-  const handlePlayNow = () => navigate("/login-register?tab=login");
-  const handleRegister = () => navigate("/login-register?tab=signup");
-
+ 
   return (
     <div className="flex flex-col min-h-screen relative overflow-hidden bg-gradient-to-br from-white via-pink-100 to-pink-200 font-sans">
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white bg-opacity-70 backdrop-blur-md shadow-md">
-        <div className="w-full">
-          <div className="flex justify-between items-center h-16 px-4 sm:px-8">
-            <a href="/" className="text-pink-600 font-bold text-2xl">MathCraft</a>
-            <div className="hidden sm:flex space-x-3 items-center">
-              <a href="/" className="px-3 py-1 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition text-sm text-center">Home</a>
-              <button onClick={handlePlayNow} className="px-3 py-1 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition text-sm">Login</button>
-              <button onClick={handleRegister} className="px-3 py-1 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition text-sm">Register</button>
-              <button className="px-3 py-1 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition text-sm">About</button>
-            </div>
-            <div className="sm:hidden">
-              <button onClick={() => setMenuOpen(!menuOpen)} className="text-pink-600 font-bold text-2xl">☰</button>
-            </div>
-          </div>
-        </div>
-        {menuOpen && (
-          <div className="sm:hidden flex flex-col gap-2 px-4 py-2 bg-white bg-opacity-90 backdrop-blur-md">
-            <a href="/" className="px-3 py-1 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition text-sm text-center">Home</a>
-            <button onClick={handlePlayNow} className="px-3 py-1 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition text-sm">Login</button>
-            <button onClick={handleRegister} className="px-3 py-1 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition text-sm">Register</button>
-            <button className="px-3 py-1 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition text-sm">About</button>
-          </div>
-        )}
-      </nav>
 
-      {/* Main Content */}
-      <main className="flex-grow flex items-center justify-center relative z-10 pt-20">
-        {/* Floating Numbers */}
+      <Navbar /> 
+
+      <main className="flex-grow flex items-center justify-center relative z-10 py-10 pt-32 sm:pt-40 px-4">
         <div className="absolute inset-0 pointer-events-none w-full h-full">
           {floatingNumbers.map((n, i) => (
             <div
@@ -244,36 +293,53 @@ useEffect(() => {
           ))}
         </div>
 
-        {/* Login/Register Card */}
-        <div className="bg-white/80 backdrop-blur-md rounded-xl shadow-xl w-full max-w-md p-6 relative z-20 mt-32">
-          <h2 className="text-2xl font-bold text-center text-pink-700 mb-6 animate-fade-in">Welcome to MathCraft</h2>
+        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-md p-6 sm:p-8 relative z-20">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-pink-700 mb-6 sm:mb-8 animate-slideIn">Welcome to MathCraft</h2> 
 
-          {/* Tabs */}
           {!showResetPassword && (
-            <div className="flex mb-6 gap-2 justify-center">
+            <div className="flex mb-6 gap-0 p-1 bg-pink-100/70 rounded-xl shadow-inner border border-pink-200">
               <button
-                className={`tab-button ${activeTab === "login" ? "tab-active" : "tab-inactive"}`}
-                onClick={() => { setActiveTab("login"); setMessage(""); }}
+                className={`w-1/2 py-2 text-lg font-bold rounded-lg transition duration-200 ${
+                    activeTab === "login" 
+                        ? "bg-pink-500 text-white shadow-md hover:bg-pink-600" 
+                        : "text-gray-600 hover:bg-pink-200/50"
+                }`}
+                onClick={() => {
+                  if (activeTab === "login") { 
+                      scrollToTop();
+                  } else {
+                      setMessage(""); 
+                      navigate("/login-register?tab=login", { replace: true }); 
+                  }
+                }}
               >
                 Login
               </button>
               <button
-                className={`tab-button ${activeTab === "signup" ? "tab-active" : "tab-inactive"}`}
-                onClick={() => { setActiveTab("signup"); setMessage(""); }}
+                className={`w-1/2 py-2 text-lg font-bold rounded-lg transition duration-200 ${
+                    activeTab === "signup" 
+                        ? "bg-pink-500 text-white shadow-md hover:bg-pink-600"
+                        : "text-gray-600 hover:bg-pink-200/50"
+                }`}
+                onClick={() => {
+                   if (activeTab === "signup") { 
+                       scrollToTop();
+                   } else {
+                       setMessage(""); 
+                       navigate("/login-register?tab=signup", { replace: true }); 
+                   }
+                }}
               >
                 Signup
               </button>
             </div>
           )}
 
-          {/* Inline Message */}
           {message && !showResetPassword && (
-            <div className={`mb-4 p-3 rounded ${messageType === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+            <div className={`mb-4 p-3 rounded-lg font-medium ${messageType === "success" ? "bg-green-100 text-green-700 border border-green-300" : "bg-red-100 text-red-700 border border-red-300"}`}>
               {message}
             </div>
           )}
-
-          {/* Forgot Password Form */}
           {showResetPassword && (
             <form onSubmit={handleForgotPassword}>
               <input
@@ -292,25 +358,25 @@ useEffect(() => {
                 required
               />
               {forgotStepMessage && (
-  <div
-    className={`mb-4 p-2 rounded text-sm ${
-      forgotStepMessage.toLowerCase().includes("successfully") 
-        ? "bg-green-100 text-green-700" 
-        : "bg-red-100 text-red-700"
-    }`}
-  >
-    {forgotStepMessage}
-  </div>
-)}
+                <div
+                  className={`mb-4 p-2 rounded text-sm ${
+                    forgotStepMessage.toLowerCase().includes("successfully") 
+                      ? "bg-green-100 text-green-700" 
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {forgotStepMessage}
+                </div>
+              )}
 
               <button
                 type="submit"
-                className="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition transform"
+                className="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition transform hover:bg-pink-600"
               >
                 Send Reset Link
               </button>
               <p
-                className="text-center mt-4 text-gray-600 cursor-pointer hover:underline"
+                className="text-center mt-4 text-gray-600 text-sm cursor-pointer hover:underline"
                 onClick={() => { setShowResetPassword(false); setMessage(""); setForgotStepMessage(""); }}
               >
                 Back to login
@@ -324,21 +390,23 @@ useEffect(() => {
               <input
                 type="text"
                 placeholder="Username"
-                className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none transition"
                 value={loginData.username}
                 onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
+                required
               />
               <div className="relative">
                 <input
                   type={showLoginPassword ? "text" : "password"}
                   placeholder="Password"
-                  className="w-full p-3 mb-2 border rounded-lg focus:ring-2 focus:ring-pink-400 focus:outline-none pr-10"
+                  className="w-full p-3 mb-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none transition pr-10"
                   value={loginData.password}
                   onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                  required
                 />
                 <button
                   type="button"
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-pink-600 transition"
                   onClick={() => setShowLoginPassword(!showLoginPassword)}
                 >
                   {showLoginPassword ? <Eye size={20} /> : <EyeOff size={20} />}
@@ -350,9 +418,9 @@ useEffect(() => {
               >
                 Forgot password?
               </p>
-              <button type="submit" className="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition transform">Login</button>
+              <button type="submit" className="w-full py-3 bg-pink-500 text-white font-bold rounded-lg shadow-xl hover:bg-pink-600 glow-hover transition transform">Log In</button>
               <p className="text-center mt-4 text-gray-600">
-                Not a member? <span className="text-pink-500 cursor-pointer hover:underline" onClick={() => setActiveTab("signup")}>Signup now</span>
+                Not a member? <span className="text-pink-600 cursor-pointer hover:underline font-medium" onClick={() => navigate("/login-register?tab=signup")}>Signup now</span> {/* FIX: Use navigate */}
               </p>
             </form>
           )}
@@ -363,52 +431,106 @@ useEffect(() => {
               <input
                 type="text"
                 placeholder="Username"
-                className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none transition"
                 value={signupData.username}
                 onChange={(e) => setSignupData({ ...signupData, username: e.target.value })}
+                required
               />
               <input
                 type="email"
                 placeholder="Email Address"
-                className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none transition"
                 value={signupData.email}
                 onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                required
               />
-              <div className="relative">
-                <input
-                  type={showSignupPassword ? "text" : "password"}
-                  placeholder="Password"
-                  className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-pink-400 focus:outline-none pr-10"
-                  value={signupData.password}
-                  onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                />
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowSignupPassword(!showSignupPassword)}
-                >
-                  {showSignupPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-                </button>
+              
+              <div className="relative mb-4">
+                  {flashStatus && (
+                      <div className="text-sm p-2 rounded-lg bg-green-100 text-green-700 border border-green-300 flex items-center transition duration-300 animate-slideInDown 
+                                    absolute left-1/2 -top-10 transform -translate-x-1/2 z-30 shadow-lg min-w-[70%] whitespace-nowrap">
+                          <svg 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            className="h-5 w-5 mr-2 text-white bg-green-500 rounded-full flex-shrink-0 animate-scaleIn" 
+                            viewBox="0 0 24 24" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                          
+                          <span className="font-semibold">
+                              {flashStatus === 'isLongEnough' && 'Min 8 characters'}
+                              {flashStatus === 'hasCapital' && 'Capital letter added'}
+                              {flashStatus === 'hasNumber' && 'Number added'}
+                              {flashStatus === 'hasSpecial' && 'Special character added'}
+                              {flashStatus === 'isConfirmMatch' && 'Passwords matched'}
+                          </span>
+                      </div>
+                  )}
+
+                  {/* Password Input Field */}
+                  <div className="relative">
+                      <input
+                          type={showSignupPassword ? "text" : "password"}
+                          placeholder="Password"
+                          className={`w-full p-3 rounded-lg focus:outline-none transition pr-10 ${
+                              isLongEnough && hasCapital && hasNumber && hasSpecial
+                                  ? 'border-2 border-green-500 focus:ring-green-100 focus:ring-2' 
+                                  : 'border border-gray-300 focus:ring-pink-500 focus:ring-2'    
+                          }`}
+                          value={signupData.password}
+                          onChange={(e) => {
+                              const newData = { ...signupData, password: e.target.value };
+                              setSignupData(newData);
+                              validateSignup(newData); 
+                          }}
+                          required
+                      />
+                      <button
+                          type="button"
+                          className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-pink-600 transition"
+                          onClick={() => setShowSignupPassword(!showSignupPassword)}
+                      >
+                          {showSignupPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                      </button>
+                  </div>
               </div>
+
+              {signupErrors.password && <p className="text-red-500 text-sm mb-4 -mt-3">{signupErrors.password}</p>}
+              
               <div className="relative">
                 <input
                   type={showSignupConfirmPassword ? "text" : "password"}
                   placeholder="Confirm Password"
-                  className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-pink-400 focus:outline-none pr-10"
+                  className={`w-full p-3 mb-4 rounded-lg focus:outline-none transition pr-10 ${
+                    isConfirmMatch 
+                        ? 'border-2 border-green-500 focus:ring-green-100 focus:ring-2' 
+                        : 'border border-gray-300 focus:ring-pink-500 focus:ring-2'    
+                  }`}
                   value={signupData.confirmPassword}
-                  onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
+                  onChange={(e) => {
+                    const newData = { ...signupData, confirmPassword: e.target.value };
+                    setSignupData(newData);
+                    validateSignup(newData); 
+                  }}
+                  required
                 />
                 <button
                   type="button"
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-pink-600 transition"
                   onClick={() => setShowSignupConfirmPassword(!showSignupConfirmPassword)}
                 >
                   {showSignupConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
-              <button type="submit" className="w-full py-3 bg-pink-500 text-white font-semibold rounded-lg shadow-md glow-hover transition transform">Signup</button>
+              {signupErrors.confirmPassword && <p className="text-red-500 text-sm mb-4 -mt-3">{signupErrors.confirmPassword}</p>}
+              <button type="submit" className="w-full py-3 bg-pink-500 text-white font-bold rounded-lg shadow-xl hover:bg-pink-600 glow-hover transition transform">Sign Up</button>
               <p className="text-center mt-4 text-gray-600">
-                Already a member? <span className="text-pink-500 cursor-pointer hover:underline" onClick={() => setActiveTab("login")}>Login</span>
+                Already a member? <span className="text-pink-600 cursor-pointer hover:underline font-medium" onClick={() => navigate("/login-register?tab=login")}>Login</span> {/* FIX: Use navigate */}
               </p>
             </form>
           )}

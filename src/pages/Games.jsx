@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
+import monkeyVideo from '../assets/monkey.mp4'; 
 
-// Constants
 const QUESTIONS_PER_ROUND = 10;
 const DEFAULT_COINS = 1000;
 const MAX_STREAK = 5;
@@ -8,27 +8,20 @@ const LOCAL_STORAGE_KEY_USER = "mc_user_v1";
 
 const BASE_API = import.meta.env.VITE_BASE_API;
 
-// Added color properties for visual distinction and styling
 const DIFFICULTY = {
   easy: { threshold: 90, hintCost: 100, coinReward: 1000, color: 'text-green-600', colorClass: 'bg-green-200/50 border-green-500' },
   intermediate: { threshold: 60, hintCost: 200, coinReward: 2000, color: 'text-orange-600', colorClass: 'bg-orange-200/50 border-orange-500' },
   hard: { threshold: 30, hintCost: 300, coinReward: 3000, color: 'text-red-600', colorClass: 'bg-red-200/50 border-red-500' },
 };
 
-// ====================================================================
-// CRITICAL FIX: REMOVED local NUMBER_HINT_POOL and generateHint function
-// ====================================================================
 
 export default function Games() {
-  // Game State (to be persisted)
   const [user, setUser] = useState({ coins: DEFAULT_COINS });
   const [mode, setMode] = useState("easy");
-  // NOTE: currentQuestion no longer stores the solution
   const [currentQuestion, setCurrentQuestion] = useState(null); 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [roundRecords, setRoundRecords] = useState([]);
   
-  // Ephemeral State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [hintText, setHintText] = useState(""); 
@@ -43,7 +36,7 @@ export default function Games() {
   const [isInitialising, setIsInitialising] = useState(true); 
 
 
-  // --- Utility to get user-specific storage key ---
+
   const getGameStorageKey = () => {
     const token = localStorage.getItem("token");
     if (!token) return "mc_game_v1_guest"; 
@@ -70,11 +63,9 @@ export default function Games() {
     };
     localStorage.setItem(getGameStorageKey(), JSON.stringify(gameState));
   };
-  
  
-// --- Initialization: Load User & Game State ---
+
 useEffect(() => {
-    // 1️⃣ Load User Coins
     const rawUser = localStorage.getItem(LOCAL_STORAGE_KEY_USER);
     if (rawUser) {
         setUser(JSON.parse(rawUser));
@@ -84,7 +75,6 @@ useEffect(() => {
         localStorage.setItem(LOCAL_STORAGE_KEY_USER, JSON.stringify(initialUser));
     }
 
-    // 2️⃣ Load Game State
     const token = localStorage.getItem("token");
     if (!token) {
         localStorage.removeItem(getGameStorageKey());
@@ -100,7 +90,6 @@ useEffect(() => {
 
     const gameState = JSON.parse(rawGame);
 
-    // 🔹 ROUND COMPLETED: Force Mission Debrief
     if ((gameState.currentIndex || 0) >= QUESTIONS_PER_ROUND && (gameState.roundRecords?.length || 0) > 0) {
         setRoundRecords(gameState.roundRecords);
         setMode(gameState.mode || "easy");
@@ -111,14 +100,21 @@ useEffect(() => {
         return;                            
     }
 
-    // 🔹 IN-PROGRESS GAME: Restore question
+
     if (gameState.currentQuestion && (gameState.currentIndex || 0) < QUESTIONS_PER_ROUND) {
-        // NOTE: Restoring question state only includes the image URL
         setCurrentQuestion(gameState.currentQuestion); 
         setCurrentIndex(gameState.currentIndex || 0);
         setRoundRecords(gameState.roundRecords || []);
-        setMode(gameState.mode || "easy");
-        setTimer(gameState.timer || 0);
+        
+        const restoredMode = gameState.mode || "easy";
+        setMode(restoredMode);
+        
+        const restoredTimer = gameState.timer || 0;
+        setTimer(restoredTimer);
+        const cfg = DIFFICULTY[restoredMode];
+        const initialStreak = Math.max(0, MAX_STREAK - Math.floor(restoredTimer / cfg.threshold));
+        setStreak(initialStreak);
+
         setHintUsed(gameState.hintUsed || false); 
         setHintText(gameState.hintText || "");    
         setQuestionId(prev => prev + 1); 
@@ -183,8 +179,8 @@ useEffect(() => {
   }, [currentQuestion, currentIndex, roundRecords, mode, timer, hintUsed, hintText]); 
 
 
-  // --- Game Flow Functions ---
-// 🎯 CRITICAL FIX 1: loadNextQuestion MUST use POST and send context
+
+//loadNextQuestion MUST use POST and send context
   const loadNextQuestion = async (nextIndex) => {
     const token = localStorage.getItem("token");
     const gameModeId = localStorage.getItem("current_game_mode_id");
@@ -212,7 +208,6 @@ useEffect(() => {
     setCurrentIndex(nextIndex);
     setQuestionId((prev) => prev + 1);
 
-    // Persist previous state (if any)
     if (currentQuestion) {
       saveGameState({
         q: currentQuestion,
@@ -226,7 +221,6 @@ useEffect(() => {
     }
   
     try {
-      // 🎯 CRITICAL FIX: Use POST method and send game context
       const res = await fetch(`${BASE_API}/api/marcconrad-game/`, {
         method: "POST", 
         headers: {
@@ -244,13 +238,9 @@ useEffect(() => {
       }
   
       const data = await res.json();
-  
-      // Validate response format: ONLY check for question image, NO solution
       if (!data || !data.question) {
         throw new Error("Invalid API response format. Missing 'question'.");
       }
-  
-      // CRITICAL FIX: Only assign the question image. Solution is GONE.
       const newQ = { question_img: data.question }; 
       setCurrentQuestion(newQ);
   
@@ -342,11 +332,11 @@ useEffect(() => {
     });
     
     localStorage.removeItem(getGameStorageKey());
-    setLoading(true); // Set loading while waiting for create-game API
+    setLoading(true); 
   };
 
 
-// 🎯 CRITICAL FIX 2: handleSubmit MUST use a new backend API for checking the answer
+// handleSubmit MUST use a new backend API for checking the answer
   const handleSubmit = async () => {
     if (!currentQuestion || hasAnswered || loading) return;
 
@@ -364,7 +354,6 @@ useEffect(() => {
     }
     
     try {
-        // Send all context to the backend for checking and record creation
         const submissionRes = await fetch(`${BASE_API}/api/submit-answer/`, { 
             method: "POST",
             headers: {
@@ -384,17 +373,15 @@ useEffect(() => {
         if (!submissionRes.ok) {
             throw new Error("Failed to submit answer to the server.");
         }
-
-        // Backend returns: { status: 'correct'/'incorrect'/'skipped', correct_answer: 'X', final_streak: N, iq_delta: M }
         const result = await submissionRes.json();
         
         const rec = {
             question_number: questionNumber,          
             user_answer: answer || "—",
-            correct_answer: result.correct_answer, // Use secure answer from backend
+            correct_answer: result.correct_answer, 
             question_img: currentQuestion.question_img,
             time: timer,
-            streak: result.final_streak,
+            streak: result.status === 'correct' ? streak : 0,
             status: result.status,
             iq: result.iq_delta 
         };
@@ -410,7 +397,6 @@ useEffect(() => {
             setCurrentQuestion(null); 
             finalizeRound(updatedRecords); 
         } else {
-            // Give the user a moment to see the result, then load next
             setTimeout(() => {
                 loadNextQuestion(nextIndex);
             }, 1500);
@@ -419,13 +405,12 @@ useEffect(() => {
     } catch (err) {
         console.error("Submission error:", err);
         setError("Failed to submit answer. Check connection.");
-    } finally {
         setLoading(false);
     }
   };
 
 
-// 🎯 CRITICAL FIX 3: handleNextPuzzle MUST use the same new backend API for skipping
+//handleNextPuzzle MUST use the same new backend API for skipping
   const handleNextPuzzle = async () => {
     if (!currentQuestion || hasAnswered || loading) return;
 
@@ -451,9 +436,9 @@ useEffect(() => {
             body: JSON.stringify({
                 game_mode_id: gameModeId,
                 question_number: questionNumber,
-                user_answer: "SKIPPED", // Indicate a skip
+                user_answer: "SKIPPED", 
                 time_taken: timer,
-                streak: 0, // Streak is zeroed on skip
+                streak: 0, 
                 hint_used: hintUsed,
             }),
         });
@@ -467,7 +452,7 @@ useEffect(() => {
         const rec = {
             question_number: questionNumber,      
             user_answer: "SKIPPED",
-            correct_answer: result.correct_answer, // Get correct answer for summary
+            correct_answer: result.correct_answer, 
             question_img: currentQuestion.question_img,
             time: timer,
             streak: 0,
@@ -487,6 +472,7 @@ useEffect(() => {
             setCurrentQuestion(null); 
             finalizeRound(updatedRecords); 
         } else {
+            setLoading(true);     
             setTimeout(() => {
                 loadNextQuestion(nextIndex);
             }, 500);
@@ -494,13 +480,12 @@ useEffect(() => {
     } catch (err) {
         console.error("Skip submission error:", err);
         setError("Failed to skip puzzle. Check connection.");
-    } finally {
         setLoading(false);
-    }
+    } 
   };
 
 
- // --- Handle Hint Purchase (Your existing code, which was already perfect) ---
+ // --- Handle Hint Purchase ---
 const handleHint = async () => {
   if (!currentQuestion || hintUsed) return;
 
@@ -571,8 +556,7 @@ const handleHint = async () => {
   }
 };
 // --- Finalize Round ---
-// NOTE: This function no longer posts individual records, as that's now handled 
-// by submit_answer API (or skip logic). It only posts the IQ update and finalizes the UI.
+
  const finalizeRound = (records) => {
   const finalRecords = records || roundRecords;
 
@@ -737,21 +721,17 @@ const handleHint = async () => {
         }
       `}</style>
 
-      {/* FIXED GAME HEADER AND COINS */}
       <header className="fixed top-0 left-0 right-0 p-4 game-header flex justify-between items-center z-20">
           <div className="text-3xl font-extrabold text-gray-800 tracking-widest uppercase">
               <span className="text-pink-600">MATH</span><span className="text-emerald-600">CRAFT</span>
           </div>
       </header>
 
-      <main className="pt-36 px-4 sm:px-8 flex justify-center items-start min-h-screen ml-0 sm:ml-64">
+      <main className="pt-20 px-4 sm:px-8 flex justify-center items-start min-h-screen ml-0 sm:ml-64">
 
         {!isInitialising && (
             <>
                 {error && <div className="text-red-600 mb-4 game-panel p-3 text-center border-red-500">{error}</div>}
-
-
-                {/* Start Screen - MISSION SELECTION */}
                 {!currentQuestion && !showSummary && currentIndex === 0 && !loading && (
                 <section className="game-panel p-10 mb-6 text-center">
                     <h1 className="text-4xl font-extrabold text-gray-800 mb-6 tracking-wider">
@@ -775,10 +755,24 @@ const handleHint = async () => {
     Execute Challenge
 </button>
                     </div>
+                          {/*VIDEO*/}
+      <div className="mt-8 w-full max-w-lg mx-auto">
+  <video 
+    autoPlay 
+    loop 
+    muted 
+    className="w-full rounded-lg shadow-lg"
+  >
+    <source src={monkeyVideo} type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+
                 </section>
                 )}
 
-                {/* Game Screen - ACTIVE PUZZLE */}
+                {/* Game Screen */}
             {(currentQuestion || loading) && !showSummary && (
             <div className="flex flex-col items-center w-full">
                 
@@ -864,43 +858,48 @@ const handleHint = async () => {
             )}
 
 
-                {/* ────────────────────────────────────────────────────────────────
-     SUMMARY SCREEN – RESPONSIVE TABLE / CARD LAYOUT (JSX only)
-   ──────────────────────────────────────────────────────────────── */}
+                {/*SUMMARY SCREEN */}
 {showSummary && (
   <section className="game-panel p-6 sm:p-8">
 
-    {/* Title */}
     <h2 className="text-3xl font-extrabold text-gray-800 mb-6 text-center uppercase tracking-wider text-pink-600">
       <span className="text-emerald-600">Summary</span>
     </h2>
+    <div className="flex flex-col sm:flex-row sm:gap-8 sm:items-start"> 
+        
+        <div className="sm:w-1/3 sm:max-w-xs md:max-w-sm mx-auto sm:mx-0"> 
 
-     {/* FINAL MISSION RESULT CARD – LIGHT GREEN IF REWARD, LIGHT RED IF NOT */}
 {roundRecords.length > 0 && roundRecords[roundRecords.length - 1].status === "summary" && (
   <div
     className={`
-      mx-auto max-w-2xl p-5 sm:p-7 rounded-2xl border-4 shadow-xl
-      text-center font-bold text-lg sm:text-xl
+      p-5 sm:p-7 rounded-2xl border-4 shadow-xl
+      text-center 
+      font-[Poppins]  /* << CHANGE FONT FAMILY */
+      text-sm sm:text-base /* << GLOBAL SMALLER FONT SIZE */
       ${roundRecords[roundRecords.length - 1].coins > 0
         ? "bg-gradient-to-br from-green-50 to-green-100 border-green-300 shadow-green-400/30 text-green-700"
         : "bg-gradient-to-br from-red-50 to-red-100 border-red-300 shadow-red-400/30 text-red-700"
       }
     `}
   >
+    
     {/* Status Title */}
-    <p className="text-2xl sm:text-3xl mb-3 text-gray-900 font-extrabold tracking-wide">
-      {roundRecords[roundRecords.length - 1].coins > 0 ? "Status: Reward Granted" : "Status: Complete"}
+    <p className="text-lg sm:text-xl mb-2 text-gray-900 font-extrabold tracking-wide">
+      {roundRecords[roundRecords.length - 1].coins > 0
+        ? "Status: Reward Granted"
+        : "Status: Complete"}
     </p>
 
     {/* Mission Summary */}
-    <p className="mb-3 text-base sm:text-lg text-gray-700">
-      Mission Complete: {roundRecords[roundRecords.length - 1].correctCount}/{QUESTIONS_PER_ROUND} Sequences Decoded.
+    <p className="mb-2 text-xs sm:text-sm text-gray-700 font-bold">
+
+      Decoded Sequences: <span className="font-extrabold">{roundRecords[roundRecords.length - 1].correctCount}</span> of {QUESTIONS_PER_ROUND}
     </p>
 
-    {/* Reward Line – LIGHT GREEN or LIGHT RED */}
+    {/* Reward Line */}
     <p
       className={`
-        text-lg sm:text-xl font-bold tracking-wider
+        text-sm sm:text-base font-semibold tracking-wide
         ${roundRecords[roundRecords.length - 1].coins > 0
           ? "text-green-600"
           : "text-red-600"
@@ -909,167 +908,168 @@ const handleHint = async () => {
     >
       {roundRecords[roundRecords.length - 1].coins > 0
         ? `+${roundRecords[roundRecords.length - 1].coins} COINS DEPOSITED`
-        : "Reward threshold (5 correct) not met."
-      }
+        : "🎯 Decode 5+ sequences next time to claim reward."}
     </p>
+
   </div>
 )}
 
-    <h3 className="text-xl font-semibold text-gray-600 mb-4 border-b border-gray-300 pb-2 mt-6 tracking-wider">
-      Sequence Log
-    </h3>
 
-    {/* ────── RESPONSIVE CONTAINER ────── */}
-    <div className="w-full overflow-x-auto sm:overflow-visible">
+            {/* IQ badge */}
+            {roundRecords.length > 0 && roundRecords[roundRecords.length - 1].status === "summary" && (
+                <div className="mt-6 mx-auto max-w-sm p-6 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-2xl shadow-2xl shadow-pink-500/50 animate-pulse text-center font-extrabold text-2xl">
+                    Score: {roundRecords[roundRecords.length - 1].iq}
+                </div>
+            )}
 
-      {/* ---------- DESKTOP TABLE (≥640px) ---------- */}
-      <table className="hidden sm:table min-w-full table-auto border-collapse text-xs sm:text-sm">
-        <thead>
-          <tr className="bg-gray-100 uppercase text-[10px] sm:text-xs">
-            <th className="p-3 font-medium">Q No</th>
-            <th className="p-3 font-medium">Image</th>
-            <th className="p-3 font-medium">Time (s)</th>
-            <th className="p-3 font-medium">Streak</th>
-            <th className="p-3 font-medium">Your Input</th>
-            <th className="p-3 font-medium">Correct Answer</th>
-            <th className="p-3 font-medium">Status</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {roundRecords
-            .filter(r => r.status !== "summary")
-            .map((r, i) => (
-              <tr
-                key={i}
-                className={`text-center transition-colors ${
-                  r.status === "correct"
-                    ? "bg-green-50/50 hover:bg-green-100"
-                    : r.status === "skipped"
-                    ? "bg-yellow-50/50 hover:bg-yellow-100"
-                    : "bg-red-50/50 hover:bg-red-100"
-                }`}
-              >
-                <td className="p-3">{r.question_number}</td>
-                <td className="p-3">
-                  <img
-                    src={r.question_img}
-                    alt={`Q${r.question_number}`}
-                    className="w-16 h-16 object-contain mx-auto rounded-lg border border-gray-300 cursor-pointer hover:scale-105 transition-transform"
-                    onClick={() => setPreviewImage(r.question_img)}
-                    onError={e => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "https://placehold.co/80x80/f0f3f7/EC4899?text=NA";
-                    }}
-                  />
-                </td>
-                <td className="p-3 text-cyan-600">{r.time}</td>
-                <td className="p-3 text-pink-600">{r.streak}</td>
-                <td className="p-3 font-mono">{r.user_answer}</td>
-                <td className="p-3 font-mono">{r.correct_answer}</td>
-                <td
-                  className={`p-3 font-bold ${
-                    r.status === "correct"
-                      ? "text-green-600"
-                      : r.status === "skipped"
-                      ? "text-yellow-600"
-                      : "text-red-600"
-                  }`}
+            {/* Restart button */}
+            <div className="flex justify-center mt-8">
+                <button
+                    className="btn btn-submit text-2xl font-extrabold shadow-pink-600/50 shadow-xl"
+                    onClick={restartToModeSelection}
                 >
-                  {r.status === "correct" ? "PASS" : r.status === "skipped" ? "SKIP" : "FAIL"}
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
+                    Select Mode
+                </button>
+            </div>
+            
+        </div> 
 
-{/* ---------- MOBILE CARD LIST (<640px) ---------- */}
-<div className="sm:hidden space-y-4">
-  {roundRecords
-    .filter(r => r.status !== "summary")
-    .map((r, i) => (
-      <div
-        key={i}
-        className={`p-4 rounded-lg border-2 ${
-          r.status === "correct"
-            ? "bg-green-50 border-green-400"
-            : r.status === "skipped"
-            ? "bg-yellow-50 border-yellow-400"
-            : "bg-red-50 border-red-400"
-        }`}
-      >
-        {/* Q# + Status */}
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-gray-800">Q{r.question_number}</span>
-          <span
-            className={`font-bold ${
-              r.status === "correct"
-                ? "text-green-600"
-                : r.status === "skipped"
-                ? "text-yellow-600"
-                : "text-red-600"
-            }`}
-          >
-            {r.status === "correct" ? "PASS" : r.status === "skipped" ? "SKIP" : "FAIL"}
-          </span>
-        </div>
+        {/* 2. Sequence Log */}
+        <div className="sm:w-2/3 mt-8 sm:mt-0">
+            <h3 className="text-xl font-semibold text-gray-600 mb-4 border-b border-gray-300 pb-2 tracking-wider">
+                Sequence Log
+            </h3>
+            <div className="w-full overflow-x-auto sm:overflow-visible">
 
-        {/* Image – scrollable if needed */}
-        <div className="overflow-x-auto -mx-4 px-4 mb-3">
-          <img
-            src={r.question_img}
-            alt={`Q${r.question_number}`}
-            className="h-24 w-auto max-w-none mx-auto rounded border border-gray-300 cursor-pointer"
-            onClick={() => setPreviewImage(r.question_img)}
-            onError={e => {
-              e.currentTarget.onerror = null;
-              e.currentTarget.src = "https://placehold.co/80x80/f0f3f7/EC4899?text=NA";
-            }}
-          />
-        </div>
+                {/* ---------- DESKTOP TABLE (≥640px) ---------- */}
+                <table className="hidden sm:table min-w-full table-auto border-collapse text-xs sm:text-sm">
+                    <thead>
+                    <tr className="bg-gray-100 uppercase text-[10px] sm:text-xs">
+                        <th className="p-3 font-medium">Q No</th>
+                        <th className="p-3 font-medium">Image</th>
+                        <th className="p-3 font-medium">Time (s)</th>
+                        <th className="p-3 font-medium">Streak</th>
+                        <th className="p-3 font-medium">Your Input</th>
+                        <th className="p-3 font-medium">Correct Answer</th>
+                        <th className="p-3 font-medium">Status</th>
+                    </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                    {roundRecords
+                        .filter(r => r.status !== "summary")
+                        .map((r, i) => (
+                        <tr
+                            key={i}
+                            className={`text-center transition-colors ${
+                            r.status === "correct"
+                                ? "bg-green-50/50 hover:bg-green-100"
+                                : r.status === "skipped"
+                                ? "bg-yellow-50/50 hover:bg-yellow-100"
+                                : "bg-red-50/50 hover:bg-red-100"
+                            }`}
+                        >
+                            <td className="p-3">{r.question_number}</td>
+                            <td className="p-3">
+                            <img
+                                src={r.question_img}
+                                alt={`Q${r.question_number}`}
+                                className="w-16 h-16 object-contain mx-auto rounded-lg border border-gray-300 cursor-pointer hover:scale-105 transition-transform"
+                                onClick={() => setPreviewImage(r.question_img)}
+                                onError={e => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = "https://placehold.co/80x80/f0f3f7/EC4899?text=NA";
+                                }}
+                            />
+                            </td>
+                            <td className="p-3 text-cyan-600">{r.time}</td>
+                            <td className="p-3 text-pink-600">{r.streak}</td>
+                            <td className="p-3 font-mono">{r.user_answer}</td>
+                            <td className="p-3 font-mono">{r.correct_answer}</td>
+                            <td
+                            className={`p-3 font-bold ${
+                                r.status === "correct"
+                                ? "text-green-600"
+                                : r.status === "skipped"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                            }`}
+                            >
+                            {r.status === "correct" ? "PASS" : r.status === "skipped" ? "SKIP" : "FAIL"}
+                            </td>
+                        </tr>
+                        ))}
+                    </tbody>
+                </table>
 
-        {/* Text data – 2-column grid */}
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <span className="font-bold text-gray-600">Time</span>
-            <p className="font-bold text-cyan-600">{r.time}s</p>
-          </div>
-          <div>
-            <span className="font-bold text-gray-600">Streak</span>
-            <p className="font-bold text-pink-600">{r.streak}</p>
-          </div>
-          <div>
-            <span className="font-bold text-gray-600">Your Input</span>
-            <p className="font text-gray-800">
-              {/* Lower-case only for SKIPPED */}
-              {r.status === "skipped" ? r.user_answer.toLowerCase() : r.user_answer}
-            </p>
-          </div>
-          <div>
-            <span className="font-bold text-gray-600">Correct</span>
-            <p className="font-bold text-emerald-600">{r.correct_answer}</p>
-          </div>
-        </div>
-      </div>
-    ))}
-</div>
-    </div>
+                {/* ---------- MOBILE CARD LIST (<640px) ---------- */}
+                <div className="sm:hidden space-y-4">
+                {roundRecords
+                    .filter(r => r.status !== "summary")
+                    .map((r, i) => (
+                    <div
+                        key={i}
+                        className={`p-4 rounded-lg border-2 ${
+                        r.status === "correct"
+                            ? "bg-green-50 border-green-400"
+                            : r.status === "skipped"
+                            ? "bg-yellow-50 border-yellow-400"
+                            : "bg-red-50 border-red-400"
+                        }`}
+                    >
+                        <div className="flex justify-between items-center mb-2">
+                        <span className="font-bold text-gray-800">Q{r.question_number}</span>
+                        <span
+                            className={`font-bold ${
+                            r.status === "correct"
+                                ? "text-green-600"
+                                : r.status === "skipped"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                            }`}
+                        >
+                            {r.status === "correct" ? "PASS" : r.status === "skipped" ? "SKIP" : "FAIL"}
+                        </span>
+                        </div>
+                        <div className="overflow-x-auto -mx-4 px-4 mb-3">
+                        <img
+                            src={r.question_img}
+                            alt={`Q${r.question_number}`}
+                            className="h-24 w-auto max-w-none mx-auto rounded border border-gray-300 cursor-pointer"
+                            onClick={() => setPreviewImage(r.question_img)}
+                            onError={e => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = "https://placehold.co/80x80/f0f3f7/EC4899?text=NA";
+                            }}
+                        />
+                        </div>
 
-    {/* Restart button */}
-    <div className="flex justify-center mt-8">
-      <button
-        className="btn btn-submit text-xl shadow-pink-600/50 shadow-xl"
-        onClick={restartToModeSelection}
-      >
-        Select New Mode
-      </button>
-    </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <span className="font-bold text-gray-600">Time</span>
+                            <p className="font-bold text-cyan-600">{r.time}s</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-600">Streak</span>
+                            <p className="font-bold text-pink-600">{r.streak}</p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-600">Your Input</span>
+                            <p className="font text-gray-800">
+                            {r.status === "skipped" ? r.user_answer.toLowerCase() : r.user_answer}
+                            </p>
+                        </div>
+                        <div>
+                            <span className="font-bold text-gray-600">Correct</span>
+                            <p className="font-bold text-emerald-600">{r.correct_answer}</p>
+                        </div>
+                        </div>
+                    </div>
+                    ))}
+                </div>
+            </div>
+        </div> 
+    </div> 
 
-    {/* IQ badge */}
-    {roundRecords.length > 0 && roundRecords[roundRecords.length - 1].status === "summary" && (
-      <div className="mt-6 mx-auto max-w-sm p-6 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-2xl shadow-2xl shadow-pink-500/50 animate-pulse text-center font-extrabold text-2xl">
-        Score: {roundRecords[roundRecords.length - 1].iq}%
-      </div>
-    )}
   </section>
 )}
             </>

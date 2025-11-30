@@ -66,12 +66,12 @@ const Graph = () => {
             labels: chartData.iqData.labels,
             datasets: [
               {
-                label: "IQ Score",
+                label: "Score",
                 data: chartData.iqData.iq_scores,
                 borderColor: SECONDARY_PURPLE,
                 backgroundColor: "rgba(147, 51, 234, 0.1)",
                 pointBackgroundColor: SECONDARY_PURPLE,
-                pointRadius: 5,
+                pointRadius: 6,
                 tension: 0.4,
                 fill: true,
               },
@@ -83,99 +83,126 @@ const Graph = () => {
             animation: animationConfig,
             plugins: { legend: { display: false } },
             scales: {
-              y: { suggestedMin: 0, grid: { color: "rgba(0,0,0,0.05)" } },
-              x: { grid: { display: false } },
-            },
-          },
-        }
-      );
-    }
+              y: {
+  min: 0,
+  max: 100,
+  ticks: {
+    stepSize: 10,
+    callback: (value) => value,
+  },
+  grid: { color: "rgba(0,0,0,0.05)" },
+},
 
-    // --- Game Performance (last 10 games streak) ---
-    if (streakLineChartRef.current && chartData.streakData?.total_streaks?.length > 0) {
-      destroyIfExists("streak");
-      chartInstances.current["streak"] = new Chart(
-        streakLineChartRef.current.getContext("2d"),
-        {
-          type: "line",
-          data: {
-            labels: chartData.streakData.labels,
-            datasets: [
-              {
-                label: "Total Streak per Game",
-                data: chartData.streakData.total_streaks,
-                borderColor: PRIMARY_PINK,
-                backgroundColor: "rgba(219, 39, 119, 0.2)",
-                pointBackgroundColor: chartData.streakData.modes.map((mode) => {
-                  if (mode === "Easy") return "green";
-                  if (mode === "Intermediate") return "orange";
-                  if (mode === "Hard") return "red";
-                  return PRIMARY_PINK;
-                }),
-                pointRadius: 6,
-                tension: 0.4,
-                fill: false,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: animationConfig,
-            plugins: {
-              legend: { display: true },
-              tooltip: {
-                callbacks: {
-                  label: function (context) {
-                    const index = context.dataIndex;
-                    const mode = chartData.streakData.modes[index];
-                    const streak = context.dataset.data[index];
-                    return ` ${streak} points (${mode})`;
-                  },
-                },
-              },
-            },
-            scales: {
-              y: { beginAtZero: true, suggestedMax: 50, ticks: { precision: 0 } },
               x: { grid: { display: false } },
             },
           },
         }
       );
     }
+// --- Game Performance (last 10 games streak) ---
+if (streakLineChartRef.current && chartData.streakData?.total_streaks?.length > 0) {
+  destroyIfExists("streak");
+  chartInstances.current["streak"] = new Chart(
+    streakLineChartRef.current.getContext("2d"),
+    {
+      type: "bar", 
+      data: {
+        labels: chartData.streakData.labels,
+        datasets: [
+          {
+            data: chartData.streakData.total_streaks,
+            backgroundColor: chartData.streakData.modes.map((mode) => {
+              if (mode === "Easy") return "rgba(34, 197, 94, 0.8)"; 
+              if (mode === "Intermediate") return "rgba(251, 191, 36, 0.8)"; 
+              if (mode === "Hard") return "rgba(239, 68, 68, 0.8)"; 
+              return PRIMARY_PINK;
+            }),
+            borderRadius: 4, 
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: animationConfig,
+        plugins: {
+          legend: { display: false }, 
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const index = context.dataIndex;
+                const mode = chartData.streakData.modes[index];
+                const streak = context.dataset.data[index];
+                return ` ${streak} Streaks (${mode})`;
+              },
+            },
+          },
+        },
+        scales: {
+          y: { 
+            beginAtZero: true, 
+            suggestedMax: 50, 
+            ticks: { precision: 0 } 
+          },
+          x: { grid: { display: false } },
+        },
+      },
+    }
+  );
+}
+// --- Monthly IQ (Horizontal Bar) ---
+if (monthlyIQChartRef.current && chartData.monthlyData?.avg_iq?.length > 0) {
+  destroyIfExists("monthly");
 
-    // --- Monthly IQ ---
-    if (monthlyIQChartRef.current && chartData.monthlyData?.avg_iq?.length > 0) {
-      destroyIfExists("monthly");
-      chartInstances.current["monthly"] = new Chart(
-        monthlyIQChartRef.current.getContext("2d"),
-        {
-          type: "bar",
-          data: {
-            labels: chartData.monthlyData.labels,
-            datasets: [
-              {
-                label: "Average IQ",
-                data: chartData.monthlyData.avg_iq,
-                backgroundColor: PRIMARY_PINK,
-                hoverBackgroundColor: SECONDARY_PURPLE,
-                borderRadius: 8,
-              },
-            ],
+  const MONTH_COLORS = [
+    "#f87171", "#f8dc9cff", "#9bfcd9ff", "#60a5fa",
+    "#a78bfa", "#f472b6", "#f97316", "#adcaf3ff",
+    "#eab308", "#e1d6fcff", "#78a898ff", "#9fffa1ff",
+  ];
+
+  chartInstances.current["monthly"] = new Chart(
+    monthlyIQChartRef.current.getContext("2d"),
+    {
+      type: "bar",
+      data: {
+        labels: chartData.monthlyData.labels,
+        datasets: [
+          {
+            label: "Average Score",
+            data: chartData.monthlyData.avg_iq,
+            backgroundColor: MONTH_COLORS,
+            borderRadius: 8,
           },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: animationConfig,
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { suggestedMin: 0, grid: { color: "rgba(0,0,0,0.05)" } },
-              x: { grid: { display: false } },
+        ],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: animationConfig,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) {
+                return `Average Score: ${ctx.raw}`;
+              },
             },
           },
-        }
-      );
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { callback: (value) => value },
+            grid: { color: "rgba(0,0,0,0.05)" },
+          },
+          y: { grid: { display: false } },
+        },
+      },
     }
+  );
+}
+
 
     // --- Mode Distribution ---
     if (modePieChartRef.current && chartData.modeData?.counts?.some((c) => c > 0)) {
@@ -306,11 +333,11 @@ const Graph = () => {
         <main className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 pb-12">
 
           <ChartCard
-            title="IQ Evolution (Last 10 Games)"
+            title="Score Evolution (Last 10 Games)"
             icon={TrendingUp}
             chartRef={iqLineChartRef}
             hasData={hasIQData}
-            emptyMessage="No IQ records available"
+            emptyMessage="No Score records available"
           />
           <ChartCard
             title="Game Performance (Last 10 Games)"
