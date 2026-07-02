@@ -11,3 +11,5 @@ The project focuses on the design and development of a game, with weekly updates
 **Final Submission:** Week 11
 
 *This repository will be updated weekly with new features and progress.*
+
+Result: First Class
